@@ -1,0 +1,61 @@
+{
+  "kit_version": "{{KIT_VERSION}}",
+
+  "project": {
+    "name": "{{PROJECT_NAME}}",
+    "title": "{{PROJECT_TITLE}}",
+    "notes": ""
+  },
+
+  "plan": {
+    "start_date": "{{START_DATE}}",
+    "total_weeks": 12,
+    "horizon_label": "",
+    "weekly_hours": 3.0,
+    "weekly_block_bar": 4,
+    "phases": [
+      { "name": "Phase 1", "heading": "### Phase 1: W1-4", "first_week": 1, "last_week": 4 },
+      { "name": "Phase 2", "heading": "### Phase 2: W5-8", "first_week": 5, "last_week": 8 },
+      { "name": "Phase 3", "heading": "### Phase 3: W9-12", "first_week": 9, "last_week": 12 }
+    ],
+    "effort_levels": {
+      "minimum_day_minutes": 10,
+      "minimum_minutes": 20,
+      "target_minutes": 40,
+      "stretch_minutes": 70
+    }
+  },
+
+  "graph": { "max_parallel_new_topics": 1 },
+
+  "levels": {
+    "count": 6,
+    "names": ["recognize", "predict", "do alone", "spot the failure mode", "explain aloud", "applied for 7 days"]
+  },
+
+  "esl": { "enabled": true, "level": "B1", "output_ceiling": "B2" },
+
+  "perform": {
+    "mode": "application",
+    "scenarios": [
+      { "name": "cold application", "prompt": "a real decision from my week, answered with this material, no notes" },
+      { "name": "teach-back", "prompt": "explain it to a sceptical novice in 2 minutes" }
+    ]
+  },
+
+  "pace": {
+    "gate_fraction": 0.6,
+    "drop_ladder": [
+      { "tier": 1, "drops": "<the first thing to go>", "saves_hours": 1 }
+    ],
+    "never_dropped": []
+  },
+
+  "coach": {
+    "slot_map": [
+      { "slot": "weekday morning", "days": "Mon-Fri", "minutes": 30, "use": "main topic, learn-session" },
+      { "slot": "weekend block", "days": "Sat", "minutes": 60, "use": "second topic or perform-drill" },
+      { "slot": "weekly review", "days": "Sun", "minutes": 30, "use": "coach weekly review + error-diagnose" }
+    ]
+  }
+}

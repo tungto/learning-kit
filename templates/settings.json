@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/skills/active-revise/scripts/due_reviews.py\" --project \"$CLAUDE_PROJECT_DIR\" --summary"
+          }
+        ]
+      }
+    ]
+  }
+}
