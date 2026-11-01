@@ -1,0 +1,210 @@
+{
+  "kit_version": "0.1.0",
+
+  "project": {
+    "name": "",
+    "title": "",
+    "notes": ""
+  },
+
+  "paths": {
+    "topics_dir": "topics",
+    "plan_file": "PLAN.md",
+    "status_file": "STATUS.md",
+    "about_file": "ABOUT-ME.md",
+    "handoff_file": "HANDOFF.md",
+    "sessions_dir": "sessions",
+    "source_dir": "source",
+    "skills_dir": ".claude/skills",
+    "validate_script": "scripts/validate.py",
+    "skip_prefix": "_"
+  },
+
+  "plan": {
+    "start_date": "",
+    "total_weeks": 12,
+    "horizon_label": "",
+    "weekly_hours": 3.0,
+    "weekly_block_bar": 4,
+    "phases": [],
+    "sections": {
+      "goal": "## 1.",
+      "graph": "## 2.",
+      "parallel_rule": "### 2.2",
+      "bars": "## 3.",
+      "phases": "## 4.",
+      "tracks": "## 5.",
+      "effort_levels": "### 5.1",
+      "pace_gate": "### 5.2",
+      "checkpoints": "## 6."
+    },
+    "effort_levels": {
+      "minimum_day_minutes": 10,
+      "minimum_minutes": 20,
+      "target_minutes": 40,
+      "stretch_minutes": 70
+    }
+  },
+
+  "layout": {
+    "group_dirs": false,
+    "files": {
+      "topic": "TOPIC.md",
+      "error_log": "error-log.md",
+      "glossary": "glossary.md",
+      "patterns": "patterns.md",
+      "deep_dive": "deep-dive.md"
+    },
+    "tables": {
+      "error_log": ["Date", "Question", "My answer", "Correct", "Cause", "Fix drill", "Re-test"],
+      "glossary": ["Term", "Simple definition (my words)", "Code", "Related / not same as", "Said aloud?"],
+      "patterns": ["Trigger (when I see...)", "Move (...I do)", "From row"]
+    },
+    "dedupe_keys": {
+      "error_log": 2,
+      "glossary": 1,
+      "patterns": 1
+    },
+    "topic_fields": {
+      "state": "State",
+      "level": "Overall level",
+      "needs": "Needs",
+      "unlocks": "Unlocks",
+      "bar": "Bar category",
+      "weeks": "Planned weeks",
+      "est_hours": "Est. hours",
+      "hours_spent": "Hours spent",
+      "last_retest": "Last re-test",
+      "next_action": "Next action"
+    }
+  },
+
+  "graph": {
+    "states": ["locked", "ready", "active", "passed", "kept"],
+    "done_states": ["passed", "kept"],
+    "lite_min_level": 2,
+    "max_parallel_new_topics": 1,
+    "allow_standalone": true
+  },
+
+  "levels": {
+    "count": 6,
+    "names": ["recognize", "predict", "do alone", "spot the failure mode", "explain aloud", "applied for 7 days"]
+  },
+
+  "grading": {
+    "confidence_scale": [1, 3],
+    "pass_confidence": 3,
+    "pass_bar": "right idea, in my own words, with the key term, said in clear English, at confidence 3",
+    "shaky_bar": "any one of those missing - wrong or missing term, English that blocks the idea, or confidence 1-2 even when the answer is right",
+    "fail_bar": "wrong or blank after one best-guess nudge",
+    "causes": ["concept", "careless", "English"],
+    "cause_help": {
+      "concept": "the model itself is missing or wrong",
+      "careless": "knew it, answered before reading the question",
+      "English": "wording blocked the idea (principles 1.3 'comprehension')"
+    },
+    "depth_note": "depth is shown by naming where the model fails, not by reciting its name"
+  },
+
+  "review": {
+    "ladder_days": [2, 7, 16, 35, 90],
+    "shaky_days": 3,
+    "fail_days": 1,
+    "markers": {"pass": "✓", "shaky": "shaky", "fail": "fail"},
+    "cap_per_run": 8,
+    "rows_per_session": 5,
+    "rows_per_long_session": 6,
+    "ahead_days": 3,
+    "cold_items_per_run": 3,
+    "cold_pool_show": 10,
+    "pattern_line_from_rung": 16,
+    "error_window_days": 14,
+    "weekly_window_days": 7,
+    "fail_streak_escalate": 3,
+    "types": {
+      "skill": ["implement", "rebuild", "re-build", "write code", "build", "from scratch", "run it", "do it", "apply", "compute", "estimate"],
+      "speak": ["aloud", "say ", "explain", "speak", "record", "teach back"],
+      "recall": []
+    }
+  },
+
+  "esl": {
+    "enabled": true,
+    "level": "B1",
+    "output_ceiling": "B2",
+    "max_corrections": 3,
+    "rewrite_gate": true,
+    "pass_bar_includes_english": true,
+    "accept_chat_abbreviations": true,
+    "new_words_cap": 5,
+    "purpose": "explain an idea clearly to another person, in English, without notes",
+    "frames": [
+      "The mechanism is...",
+      "When I see X, the move is Y",
+      "I'd estimate ... because ...",
+      "The trade-off here is...",
+      "I'm not 100% sure, but my understanding is..."
+    ]
+  },
+
+  "roles": {
+    "arc": [
+      {"day": 1, "label": "Orient", "roles": ["Scoper", "Mapmaker"], "note": "Explainer only after the user's first attempt"},
+      {"day": 2, "label": "Understand", "roles": ["Socratic Questioner"]},
+      {"day": 3, "label": "Test", "roles": ["Examiner", "Checker"]},
+      {"day": 4, "label": "Explain", "roles": ["Listener"]},
+      {"day": 5, "label": "Perform", "roles": [], "handoff": "perform-drill"}
+    ],
+    "target_hit_rate": [0.6, 0.95]
+  },
+
+  "perform": {
+    "mode": "application",
+    "questions": [5, 8],
+    "default_seconds_per_answer": 90,
+    "dials": [
+      "time limit",
+      "persona: friendly -> neutral -> hostile",
+      "pushback: none -> on vague -> on everything",
+      "depth: definition -> trade-off -> failure case"
+    ],
+    "scenarios": [],
+    "exit_bar": "the answer holds under the time limit and two rounds of pushback"
+  },
+
+  "pace": {
+    "gate_fraction": 0.6,
+    "lookback_weeks": 2,
+    "drop_ladder": [],
+    "never_dropped": []
+  },
+
+  "coach": {
+    "status_sections": {
+      "today": ["## Now", "## This week", "## Daily log", "## Topics"],
+      "status": ["## Now", "## This week", "## Overall", "## Topics", "## Milestones"],
+      "weekly": ["## Now", "## This week", "## Daily log", "## Overall", "## Topics", "## Critical path", "## Milestones", "## Weekly log"],
+      "topic": ["## Now", "## Topics"]
+    },
+    "daily_log_keep": 10,
+    "minimum_day": "one recall item + one error-log row",
+    "streak_rule": "a day counts if one session or the minimum day happened",
+    "priority": ["overdue re-tests", "main topic", "second topic", "standalone topics", "stretch"],
+    "weekly_outcome_cap": 3,
+    "slot_map": []
+  },
+
+  "teach": {
+    "workspace_root": "topics/<name>",
+    "allow": ["MISSION.md", "RESOURCES.md", "NOTES.md", "lessons/", "reference/", "drills/", "assets/", "learning-records/"],
+    "lesson_theme": "light",
+    "require_citations": true
+  },
+
+  "sync": {
+    "git": true,
+    "branch": "main",
+    "transcripts": true
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "kit_version": "0.1.0",
+  "project": {
+    "name": "fixture",
+    "title": "Kit test fixture (2 topics)"
+  },
+  "plan": {
+    "start_date": "2026-10-26",
+    "total_weeks": 4,
+    "weekly_hours": 2.0,
+    "weekly_block_bar": 3,
+    "horizon_label": "fixture only",
+    "phases": [
+      {
+        "name": "Phase 1",
+        "heading": "### Phase 1: W1-2 — alpha",
+        "first_week": 1,
+        "last_week": 2
+      },
+      {
+        "name": "Phase 2",
+        "heading": "### Phase 2: W3-4 — beta",
+        "first_week": 3,
+        "last_week": 4
+      }
+    ]
+  },
+  "pace": {
+    "drop_ladder": [
+      {
+        "tier": 1,
+        "drops": "beta becomes a reading list",
+        "saves_hours": 1
+      }
+    ],
+    "never_dropped": [
+      "alpha"
+    ]
+  },
+  "coach": {
+    "slot_map": [
+      {
+        "slot": "morning",
+        "days": "Mon-Fri",
+        "minutes": 30,
+        "use": "main topic"
+      }
+    ]
+  }
+}
