@@ -39,7 +39,8 @@ session for lines most tasks never use. Read the part the task needs, when it ne
 | `{{TOPICS_DIR}}/*/error-log.md`, `glossary.md` | `session-log` and `active-revise` (both via `.claude/skills/session-log/scripts/append_row.py`) |
 | `{{TOPICS_DIR}}/*/patterns.md` | `active-revise`, one line per row that passes the pattern rung (trigger -> move, user's words) |
 | `{{PLAN_FILE}}`, `{{ABOUT_FILE}}` | Edit only when the user asks |
-| `{{TOPICS_DIR}}/*/MISSION.md`, `lessons/`, `learning-records/`, `assets/` | `teach` only |
+| `{{TOPICS_DIR}}/*/MISSION.md`, `RESOURCES.md`, `NOTES.md`, `learning-records/` | `teach` only |
+| `{{TOPICS_DIR}}/*/lessons/`, `assets/`, `reference/`, the folder `index.html` files | `create-lesson` (called by `teach`, or directly) |
 | `learning.config.json` | the user, or the AI when the user asks for a dial change |
 | `.claude/skills/*`, `.claude/kit/*`, `scripts/validate.py` | the kit's `init_project.py`. Local edits survive an update but land as `.kit-new` |
 
@@ -51,6 +52,9 @@ session for lines most tasks never use. Read the part the task needs, when it ne
   shared components in `.../assets/`). It may also write that topic's `MISSION.md` and
   `learning-records/NNNN-<dash-case>.md`. Those stay topic-local and never override the plan or
   the status file. A `teach` lesson is never evidence for a level change.
+- Writing or revising the lesson file itself: `/create-lesson` (numbering, light theme,
+  citations, `assets/` reuse, folder indexes and footer nav). `teach` decides what to teach and
+  hands the authoring over; call it directly when the subtopic is already chosen.
 - Learn or be quizzed on a topic: `/learn-session` (only `active` topics). This is the skill for
   "quiz me on X" or "study X" in this project, not a generic learning assistant.
 - Revise due items: `/active-revise`. Wrap-up: `/session-log`. Weekly analysis: `/error-diagnose`.

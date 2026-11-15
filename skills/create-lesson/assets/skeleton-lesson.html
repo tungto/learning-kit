@@ -1,0 +1,106 @@
+<!doctype html>
+<!-- Lesson shape: one column, no rail, no parts. Short: 3-5 numbered sections, one tangible win.
+     Replace every {{...}} and every HTML-comment hint. Rules: references/style-guide.md. -->
+<html lang="{{LANG}}" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{NNNN}} · {{Lesson title}}</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script src="../assets/lesson.js" defer></script>
+</head>
+<body data-ui-dark="Dark" data-ui-light="Light" data-ui-pause="Pause" data-ui-resume="Resume">
+<div class="layout solo">
+<main>
+
+  <header class="masthead">
+    <div class="eyebrow">Lesson {{NNNN}} · {{topic}}</div>
+    <h1>{{The win, as a claim - max ~8 words}}</h1>
+    <p class="lede">
+      {{One or two sentences: what you will be able to do after this, and what this lesson
+      deliberately leaves out.}}
+    </p>
+    <div class="meta">
+      <span><b>Time</b> · {{N}} min</span>
+      <span><b>Builds on</b> · <a href="{{prev}}.html">{{previous lesson}}</a></span>
+      <span><b>Primary source</b> · <a href="{{url}}">{{title}}</a></span>
+    </div>
+  </header>
+
+  <div class="wrap">
+
+    <section id="s1">
+      <h3><span class="n">1</span><span>{{Section title}}</span></h3>
+      <div class="col">
+        <p>{{Lead with the rule in bold, then the evidence. <strong>The rule.</strong> Why it holds,
+        with a citation <a href="{{url}}">[source]</a>.}}</p>
+      </div>
+
+      <!-- A diagram earns its place when the idea is a mechanism (flow, order, ownership). -->
+      <div class="dia">
+        <svg id="dia1" viewBox="0 0 900 160" role="img" aria-label="{{What the diagram shows, in one sentence}}">
+          <rect class="box" x="40"  y="50" width="200" height="60" rx="4"/>
+          <text class="lbl" x="140" y="78" text-anchor="middle">{{A}}</text>
+          <text class="lbl-sm" x="140" y="95" text-anchor="middle">{{what A does}}</text>
+          <rect class="box" x="660" y="50" width="200" height="60" rx="4" stroke="var(--actor-2)"/>
+          <text class="lbl" x="760" y="78" text-anchor="middle" fill="var(--actor-2)">{{B}}</text>
+          <text class="lbl-sm" x="760" y="95" text-anchor="middle">{{what B does}}</text>
+          <path id="w1" class="wire" stroke="var(--actor-1)" d="M240,80 H660"/>
+          <text class="lbl-sm" x="450" y="70" text-anchor="middle" fill="var(--actor-1)">{{what crosses}}</text>
+        </svg>
+        <div class="dia-cap">{{The takeaway in one sentence - not a restatement of the labels.}}</div>
+      </div>
+    </section>
+
+    <section id="s2">
+      <h3><span class="n">2</span><span>{{Section title}}</span></h3>
+      <div class="tw">
+        <table>
+          <thead><tr><th>{{Thing}}</th><th>{{Does}}</th><th>{{Watch out}}</th></tr></thead>
+          <tbody>
+            <tr><td>{{row}}</td><td>{{...}}</td><td><span class="chip warn">{{tag}}</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="note crit">
+        <span class="note-label">{{Commonly misunderstood}}</span>
+        <p>{{The wrong belief, then the correct one, in two sentences.}}</p>
+      </div>
+    </section>
+
+    <section id="s3">
+      <h3><span class="n">3</span><span>{{Check yourself}}</span></h3>
+      <div class="col">
+        <!-- Retrieval, not recognition: the learner produces the answer before seeing it.
+             Reuse a quiz component from ../assets/ if one exists. -->
+        <details>
+          <summary>{{Question that needs the idea to answer}}</summary>
+          <p>{{Answer + the reason, so a wrong guess teaches.}}</p>
+        </details>
+      </div>
+    </section>
+
+    <section id="s4">
+      <h3><span class="n">4</span><span>{{In short}}</span></h3>
+      <ul class="col">
+        <li>{{Takeaway 1}}</li>
+        <li>{{Takeaway 2}}</li>
+      </ul>
+      <div class="note">
+        <span class="note-label">{{Next step}}</span>
+        <p>{{Read the primary source: <a href="{{url}}">{{title}}</a>. Anything unclear - ask your
+        agent; it is your teacher for this topic.}}</p>
+      </div>
+    </section>
+
+    <p class="crumb" data-nav-footer>
+      <a href="index.html">{{Lessons}}</a>
+      <a href="../index.html">{{Topic hub}}</a>
+      <a href="../reference/{{counterpart}}.html">{{Reference}}</a>
+    </p>
+
+  </div>
+</main>
+</div>
+</body>
+</html>

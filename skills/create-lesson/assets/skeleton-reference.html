@@ -1,0 +1,138 @@
+<!doctype html>
+<!-- Reference shape: rail TOC + masthead + part bands + numbered sections. For reference pages,
+     reports, tutorials and anything read out of order or longer than ~6 sections.
+     Replace every {{...}} and every HTML-comment hint. Rules: references/style-guide.md. -->
+<html lang="{{LANG}}" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{Title}} · {{subtitle}}</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script src="../assets/lesson.js" defer></script>
+</head>
+<body data-ui-dark="Dark" data-ui-light="Light" data-ui-pause="Pause" data-ui-resume="Resume">
+<div class="layout">
+
+  <aside class="rail">
+    <div class="rail-brand">{{Title}}</div>
+    <div class="rail-sub">{{subtitle}}</div>
+    <button class="rail-toggle" id="navToggle" aria-expanded="false">{{Contents}}</button>
+    <nav id="toc">
+      <div class="rail-part">I · {{Orientation}}</div>
+      <a href="#s1"><span class="n">1</span><span>{{Summary and principles}}</span></a>
+      <a href="#s2"><span class="n">2</span><span>{{The big picture}}</span></a>
+      <div class="rail-part">II · {{How it works}}</div>
+      <a href="#s3"><span class="n">3</span><span>{{One flow, end to end}}</span></a>
+      <a href="#s4"><span class="n">4</span><span>{{In short}}</span></a>
+    </nav>
+  </aside>
+
+  <main>
+    <header class="masthead">
+      <div class="eyebrow">{{Kind of document}} · {{status}}</div>
+      <h1>{{Title}}</h1>
+      <p class="lede">
+        {{What this is, in one or two sentences - and what it is not (e.g. "describes what runs
+        today, not the target design").}}
+      </p>
+      <div class="meta">
+        <span><b>{{Audience}}</b> · {{who reads this}}</span>
+        <span><b>{{Convention}}</b> · {{marker}} <span class="chip info">{{tag}}</span> {{means ...}}</span>
+      </div>
+    </header>
+
+    <div class="part">
+      <div class="part-n">{{Part}} I</div>
+      <h2>{{Orientation}}</h2>
+      <p>{{One line: what this part answers, and that reading it alone gives the whole picture.}}</p>
+    </div>
+
+    <div class="wrap">
+      <section id="s1">
+        <h3><span class="n">1</span><span>{{Summary and principles}}</span></h3>
+        <div class="col"><p>{{The one idea everything else follows from, with the key phrase in
+          <strong>bold</strong>.}}</p></div>
+
+        <h5>{{N principles that drive every decision}}</h5>
+        <div class="kv">
+          <div><dt>{{Principle as a short noun phrase}}</dt><dd>{{One sentence, testable.}}</dd></div>
+          <div><dt>{{...}}</dt><dd>{{...}}</dd></div>
+          <div><dt>{{...}}</dt><dd>{{...}}</dd></div>
+        </div>
+
+        <div class="note">
+          <span class="note-label">{{The check that keeps the principle honest}}</span>
+          <p>{{If X happens, the design is wrong - do Y instead.}}</p>
+        </div>
+      </section>
+
+      <section id="s2">
+        <h3><span class="n">2</span><span>{{The big picture}}</span></h3>
+        <div class="dia">
+          <svg id="dia1" viewBox="0 0 900 220" role="img" aria-label="{{Map of the parts and who talks to whom}}">
+            <rect class="box" x="16" y="80" width="170" height="56" rx="4"/>
+            <text class="lbl" x="101" y="104" text-anchor="middle">{{CLIENT}}</text>
+            <text class="lbl-sm" x="101" y="121" text-anchor="middle">{{detail}}</text>
+            <rect class="box" x="330" y="40" width="240" height="136" rx="4" stroke="var(--accent)"/>
+            <text class="lbl" x="450" y="64" text-anchor="middle" fill="var(--accent)">{{CORE}}</text>
+            <g class="lbl-sm"><text x="350" y="92">{{part}}</text><text x="470" y="92">{{role}}</text></g>
+            <rect class="box" x="714" y="80" width="170" height="56" rx="4" stroke="var(--actor-3)"/>
+            <text class="lbl" x="799" y="112" text-anchor="middle" fill="var(--actor-3)">{{EXTERNAL}}</text>
+            <path class="wire" stroke="var(--actor-1)" d="M186,108 H330"/>
+            <path id="w2" class="wire" stroke="var(--actor-3)" d="M570,108 H714"/>
+            <text class="lbl-sm" x="642" y="98" text-anchor="middle" fill="var(--actor-3)">{{protocol}}</text>
+            <!-- Optional motion: a packet travelling the wire. Hidden under reduced motion and print. -->
+            <g class="pkt"><circle r="4.5" fill="var(--actor-3)">
+              <animateMotion dur="1.8s" repeatCount="indefinite"><mpath href="#w2"/></animateMotion>
+            </circle></g>
+          </svg>
+          <div class="dia-cap">{{The takeaway in one sentence.}}</div>
+          <div class="dia-ctl"><button type="button" data-toggle="dia1">Pause</button><button type="button" data-restart="dia1">Restart</button></div>
+        </div>
+
+        <h4>{{Who owns what}}</h4>
+        <div class="tw">
+          <table>
+            <thead><tr><th>{{A owns}}</th><th>{{B owns}}</th></tr></thead>
+            <tbody><tr><td>{{...}}</td><td>{{...}}</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div class="part">
+      <div class="part-n">{{Part}} II</div>
+      <h2>{{How it works}}</h2>
+      <p>{{One line.}}</p>
+    </div>
+
+    <div class="wrap">
+      <section id="s3">
+        <h3><span class="n">3</span><span>{{One flow, end to end}}</span></h3>
+        <p class="col">{{Walk one concrete request through every hop. Name each step as a verb.}}</p>
+        <pre><code>{{smallest real example}}</code></pre>
+        <div class="note warn">
+          <span class="note-label">{{Current state}}</span>
+          <p>{{What is not done yet, plainly.}}</p>
+        </div>
+      </section>
+
+      <section id="s4">
+        <h3><span class="n">4</span><span>{{In short}}</span></h3>
+        <ul class="col"><li>{{Takeaway}}</li></ul>
+        <div class="note">
+          <span class="note-label">{{Next step}}</span>
+          <p>{{Where to go from here, with a link.}}</p>
+        </div>
+      </section>
+
+      <p class="crumb" data-nav-footer>
+        <a href="index.html">{{Reference}}</a>
+        <a href="../index.html">{{Topic hub}}</a>
+        <a href="../lessons/{{counterpart}}.html">{{Lesson}}</a>
+      </p>
+    </div>
+  </main>
+</div>
+</body>
+</html>

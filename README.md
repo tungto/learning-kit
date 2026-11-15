@@ -25,6 +25,7 @@ Then open Claude Code in the project and type `/coach today`.
 | Skill | Role | Stage |
 |---|---|---|
 | `teach` | guided first exposure: cited lesson + printable reference | 1 knowledge |
+| `create-lesson` | authors one HTML lesson, its components and the folder indexes | called by `teach`, or directly |
 | `learn-session` | answer-first active session on one topic | 2 skill |
 | `active-revise` | spaced re-tests along the ladder, gap hunt, patterns sheet | 3 retention |
 | `perform-drill` | timed round under pushback, scripted debrief | 4 perform |

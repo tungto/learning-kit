@@ -81,6 +81,15 @@ else
 fi
 mv "$FX/topics/beta/TOPIC.md.bak" "$FX/topics/beta/TOPIC.md"; rm -f "$FX"/topics/beta/*.tmp
 
+echo "== lesson style"
+CL="$KIT/skills/create-lesson/assets"
+for s in skeleton-lesson skeleton-reference; do
+  grep -q 'data-theme="light"' "$CL/$s.html" && ok "$s opens light" || bad "$s opens light"
+done
+# every dark-scheme media query must guard against an explicit light page
+unguarded=$(awk '/prefers-color-scheme: *dark/{getline n; if (n !~ /not\(\[data-theme="light"\]\)/) print NR}' "$CL/lesson.css")
+[ -z "$unguarded" ] && ok "lesson.css dark is opt-in only" || bad "lesson.css unguarded dark at line $unguarded"
+
 echo "== wiring"
 rm -rf "$SC"; mkdir -p "$SC"
 python3 "$KIT/init_project.py" "$SC" --dry-run --title smoke >/dev/null

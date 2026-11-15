@@ -1,6 +1,6 @@
 # Fixture status
 
-**As of:** 2026-11-01 · **Week:** W1
+**As of:** 2026-11-06 · **Week:** W1
 
 ## This week (max 3 outcomes)
 1. alpha subtopic 1 to L2
@@ -9,7 +9,7 @@
 
 | Field | Value |
 |---|---|
-| Today | 2026-11-01 |
+| Today | 2026-11-06 |
 | Streak | 1 day |
 | Blocks this week | 1 of 3 |
 | Mode | normal |
@@ -19,7 +19,7 @@
 
 | Date | Topic | Minutes | Outcome |
 |---|---|---|---|
-| 2026-10-31 | alpha | 40 | subtopic 1 predicted 7/10 |
+| 2026-11-05 | alpha | 40 | subtopic 1 predicted 7/10 |
 
 ## Overall
 

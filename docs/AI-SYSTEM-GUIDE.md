@@ -117,6 +117,8 @@ The plan needs `plan.weekly_hours` per week. Every weekly review, `coach` comput
 
 `/teach` builds a workspace inside the topic folder: `teach.workspace_root` (default `topics/<name>`), and `teach.allow` lists what it may create there - typically `MISSION.md`, `RESOURCES.md`, `NOTES.md`, `lessons/`, `reference/`, `drills/`, `assets/`, `learning-records/`.
 
+Writing the lesson file itself is `/create-lesson`'s job - same workspace, same `teach.allow` bounds - so `/teach` decides what to teach and hands the authoring over. Every page it writes follows one house style - `skills/create-lesson/references/style-guide.md`, with a shared `lesson.css`/`lesson.js` copied into the topic's `assets/` and two skeletons (short lesson; rail-and-parts reference page for reports and tutorials).
+
 It never writes the plan, the status file or a `TOPIC.md` cell, and a lesson is never evidence for a level change. New files get listed under **Sources** in `TOPIC.md`.
 
 If this project wants `teach` output to land somewhere else, or wants some of those files suppressed (because the error log and deep-dive already do that job), narrow `teach.allow` - do not argue with the skill each time.
@@ -129,7 +131,8 @@ If this project wants `teach` output to land somewhere else, or wants some of th
 | `TOPIC.md` hours, subtopic levels, next action | `session-log` |
 | `error-log.md`, `glossary.md` | `session-log`, `active-revise` (via `append_row.py`) |
 | `topics/*/patterns.md` | `active-revise` (one line when a row passes the pattern rung) |
-| the `teach` workspace files | `teach` |
+| `MISSION.md`, `RESOURCES.md`, `NOTES.md`, `learning-records/` | `teach` |
+| `lessons/`, `assets/`, `reference/`, the folder `index.html` files | `create-lesson` (called by `teach`, or directly) |
 | the plan, `ABOUT-ME.md` | the AI, only when I ask |
 
 If the AI writes a file outside this table, it broke the rules. Tell it to revert.

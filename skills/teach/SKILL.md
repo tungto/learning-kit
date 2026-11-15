@@ -53,31 +53,19 @@ Fluency can give the user an illusory sense of mastery, but storage strength is 
 
 ## Lessons
 
-A lesson is the main thing you produce: the unit in which knowledge and skills reach the user. Each lesson is one self-contained HTML file, saved to `./lessons/` and titled `0001-<dash-case-name>.html` where the number increments each time.
+A lesson is the main thing you produce: the unit in which knowledge and skills reach the user. Each
+lesson is one self-contained HTML file in `./lessons/`.
 
-A lesson should be **beautiful**, with clean, readable typography and layout, since the user will return to these later to review. Think Tufte.
-
-**Light theme is the default, always.** Every HTML file this skill writes - lessons, reference documents, anything in `./assets/` - opens in light mode regardless of the operating system setting. Write `<html lang="en" data-theme="light">` on the root element of every page. A stylesheet may still define a dark palette, but it must be opt-in only: guard it as `:root[data-theme="dark"]`, and if a `@media (prefers-color-scheme: dark)` block exists, guard it with `:root:not([data-theme="light"])` so the explicit attribute wins. Never ship a page that turns dark on its own - these documents are made to print and to be read in the morning.
-
-The lesson should be short, and completable very quickly. Learners' working memory is very small, and we need to stay within it. But each lesson should give the user a single tangible win that they can build on. It should be directly tied to the mission, and should be in the user's zone of proximal development.
-
-If possible, open the lesson file for the user by running a CLI command.
-
-Each lesson should link via HTML anchors to other lessons and reference documents.
-
-**Keep the indexes current.** Every folder of HTML (`./lessons/`, `./reference/`, `./drills/`, ...) holds an `index.html` listing its files with title, one-line summary and a cross-link to the same subtopic in the sibling folders. The workspace root holds an `index.html` hub linking those folder indexes and the control files. After writing or renaming any lesson or reference document, update both, and end every page with a footer nav (`<p class="crumb" data-nav-footer>`) back to its folder index, the topic hub and its sibling-folder counterpart.
-
-Each lesson should recommend a primary source for the user to read or watch. This should be the most high-quality, high-trust resource you found on the topic.
-
-Each lesson should contain a reminder to ask followup questions to the agent. The agent is their teacher, and can assist with anything that's unclear.
+To author or revise one, follow [create-lesson](../create-lesson/SKILL.md). That skill owns the
+numbering, the light-theme rule, the citations, the folder indexes and the footer nav. Decide *what*
+to teach here - the mission, the zone of proximal development, the knowledge and the skill - then
+hand the authoring to it.
 
 ## Assets
 
-Lessons are built from reusable **components**, stored in `./assets/`: stylesheets, quiz widgets, simulators, diagram helpers, and anything else a second lesson could reuse.
-
-Reuse is the default, not the exception. Before authoring a lesson, read `./assets/` and build from the components already there. When a lesson needs something new and reusable, write it as a component in `./assets/` and link to it; never inline code a future lesson would duplicate.
-
-A shared stylesheet is the first component every workspace earns: every lesson links it, so the lessons look like one consistent course rather than a pile of one-offs. As the workspace grows, so should the component library.
+Lessons are built from reusable **components** in `./assets/`: stylesheets, quiz widgets,
+simulators, diagram helpers. Reuse is the default, not the exception; the rules live in
+[create-lesson](../create-lesson/SKILL.md).
 
 ## The Mission
 
