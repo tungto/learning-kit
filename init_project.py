@@ -253,7 +253,8 @@ def check(project):
     # behind the kit: installed (as recorded) differs from what the kit ships now
     kit_now = (KIT / "VERSION").read_text().strip()
     behind = [rel for rel, src in kit_sources(project)
-              if rel in man.get("files", {}) and src.exists() and sha(src) != man["files"][rel]]
+              if rel in man.get("files", {}) and not ignored(project, rel)
+              and sha(src) != man["files"][rel]]
     new = [rel for rel, src in kit_sources(project)
            if rel not in man.get("files", {}) and not ignored(project, rel)]
     if man.get("mode") == "link":

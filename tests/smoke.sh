@@ -201,6 +201,9 @@ open(p, "w").write(json.dumps(m))
 PY
 out=$(python3 "$KIT/init_project.py" "$SC" --check || true)
 has "$out" "BEHIND" "--check reports an older recorded hash as behind"
+touch "$SC/.claude/skills/teach/.kit-ignore"
+out=$(python3 "$KIT/init_project.py" "$SC" --check)
+has "$out" "up to date" "--check skips a .kit-ignore skill"
 rm -rf "$SC"
 
 echo
