@@ -176,6 +176,15 @@ fi
 grep -q "oops" "$SC/.claude/settings.json" && ok "malformed settings.json untouched" || bad "settings untouched"
 rm -rf "$SC"
 
+echo "== installer: configured plan/about paths"
+mkdir -p "$SC/reference"
+printf '{"paths": {"plan_file": "reference/plan.html", "about_file": "MISSION.md"}}\n' > "$SC/learning.config.json"
+echo "<p>plan</p>" > "$SC/reference/plan.html"; echo "# mission" > "$SC/MISSION.md"
+python3 "$KIT/init_project.py" "$SC" >/dev/null
+[ ! -e "$SC/PLAN.md" ] && [ ! -e "$SC/ABOUT-ME.md" ] && ok "no template PLAN/ABOUT when the config names existing files" \
+  || bad "template PLAN/ABOUT written beside configured files"
+rm -rf "$SC"
+
 echo "== installer: first install, --update, --check behind"
 mkdir -p "$SC/.claude/skills/teach"
 echo "# hand-made copy" > "$SC/.claude/skills/teach/SKILL.md"

@@ -359,9 +359,12 @@ def main():
     subs = substitutions(project, cfg, a.title)
     print(f"learning-kit {subs['KIT_VERSION']} -> {project}\n")
 
-    # 1. project files: create if absent, never touched again
+    # 1. project files: create if absent, never touched again. Plan, status and about
+    #    go to the paths the project config names (a project may keep its plan as HTML).
+    configured = {"PLAN.md": subs["PLAN_FILE"], "STATUS.md": subs["STATUS_FILE"],
+                  "ABOUT-ME.md": subs["ABOUT_FILE"]}
     for tpl, dest in PROJECT_FILES.items():
-        dst = project / dest
+        dst = project / configured.get(dest, dest)
         if dst.exists():
             rep.add("skip (exists)", dst)
             continue
