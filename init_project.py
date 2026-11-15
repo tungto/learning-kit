@@ -5,8 +5,8 @@ Usage:
   init_project.py <project-dir> [flags]
 
   --dry-run           print every action, write nothing
-  --update            re-install kit-owned files (hash-guarded)
-  --check             read-only audit: manifest drift, config keys, hook, skills
+  --update            refresh an existing installation (needs its manifest; refuses otherwise)
+  --check             read-only audit: local drift, behind-the-kit files, config keys, hook
   --link              symlink skill dirs instead of copying them (see docs/WIRING.md)
   --force             overwrite a locally modified kit-owned file (prints each one)
   --seed-topics a,b,c create those topic folders from the templates
@@ -17,7 +17,8 @@ Ownership:
   kit-owned     .claude/kit/**, .claude/skills/<kit skill>/**, scripts/validate.py,
                 docs/AI-SYSTEM-GUIDE.md, docs/principles.md
                 -> replaced only when the file still matches the manifest hash; a locally
-                   edited file is kept and the new version lands as <file>.kit-new
+                   edited file, or an existing file with no manifest entry (first install
+                   over a hand-made copy), is kept and the new version lands as <file>.kit-new
   shared        .claude/settings.json -> JSON merge, backup first, never replaced
   project       learning.config.json, CLAUDE.md, PLAN.md, STATUS.md, ABOUT-ME.md,
                 .gitignore, topics/** -> created if absent, then never touched again
@@ -130,15 +131,14 @@ def fill(text, subs):
 def copy_kit_file(src, dst, manifest, rep, dry, force):
     """Copy a kit-owned file, protecting local edits. Returns the new hash or None."""
     dst = pathlib.Path(dst)
-    rel = None
     if dst.exists():
         current = sha(dst)
-        recorded = manifest.get("files", {}).get(str(rel or dst.name))
         recorded = manifest.get("files", {}).get(manifest_key(dst, manifest))
         if current == sha(src):
             rep.add("unchanged", dst)
             return current
-        if recorded and recorded != current and not force:
+        # never recorded = a file the kit did not write; treat it as a local edit
+        if recorded != current and not force:
             new = dst.with_suffix(dst.suffix + ".kit-new")
             rep.add("MODIFIED keep", dst, f"new version -> {new.name}")
             if not dry:
@@ -250,6 +250,23 @@ def check(project):
         print(f"  - {rel}")
     bad += len(drift) + len(missing)
 
+    # behind the kit: installed (as recorded) differs from what the kit ships now
+    kit_now = (KIT / "VERSION").read_text().strip()
+    behind = [rel for rel, src in kit_sources(project)
+              if rel in man.get("files", {}) and src.exists() and sha(src) != man["files"][rel]]
+    new = [rel for rel, src in kit_sources(project)
+           if rel not in man.get("files", {}) and not ignored(project, rel)]
+    if man.get("mode") == "link":
+        print(f"kit: linked, version {kit_now}")
+    elif behind or new or man.get("kit_version") != kit_now:
+        print(f"kit: BEHIND - installed {man.get('kit_version')}, kit is {kit_now}: "
+              f"{len(behind)} changed, {len(new)} new file(s). Run --update.")
+        for rel in (behind + new)[:20]:
+            print(f"  - {rel}")
+        bad += 1
+    else:
+        print(f"kit: up to date ({kit_now})")
+
     settings, serr = load_json(project / ".claude" / "settings.json")
     if settings is None:
         print(f"hook: settings.json {serr}")
@@ -280,6 +297,21 @@ def check(project):
         bad += 1
     print("\nOK" if not bad else f"\n{bad} problem(s)")
     return 1 if bad else 0
+
+
+def kit_sources(project):
+    """(project-relative destination, kit source) for every kit-owned file."""
+    out = [(str(pathlib.Path(".claude/kit") / s.relative_to(KIT / "kit")), s) for s in walk(KIT / "kit")]
+    for skill in sorted(p for p in (KIT / "skills").iterdir() if p.is_dir()):
+        out += [(str(pathlib.Path(".claude/skills") / skill.name / s.relative_to(skill)), s) for s in walk(skill)]
+    out += [(dest, KIT / src) for src, dest in KIT_FILES.items()]
+    return out
+
+
+def ignored(project, rel):
+    parts = pathlib.Path(rel).parts
+    return len(parts) > 2 and parts[:2] == (".claude", "skills") and \
+        (project / ".claude" / "skills" / parts[2] / ".kit-ignore").exists()
 
 
 def main():
@@ -314,6 +346,10 @@ def main():
     dry = a.dry_run
     rep = Report(dry)
     manifest, _ = load_json(project / MANIFEST)
+    if a.update and not manifest:
+        sys.exit(f"error: --update needs an installation, and {project / MANIFEST} is missing.\n"
+                 f"Run without --update for a first install (existing files are kept, "
+                 f"new versions land as .kit-new).")
     manifest = manifest or {}
     manifest["_root"] = str(project)
     files = {}
@@ -418,10 +454,16 @@ Next:
 
 
 def git_commit(path):
+    """Short HEAD of the kit, with -dirty when its tree has uncommitted changes."""
     try:
         r = subprocess.run(["git", "-C", str(path), "rev-parse", "--short", "HEAD"],
                            capture_output=True, text=True)
-        return r.stdout.strip() or None
+        head = r.stdout.strip()
+        if not head:
+            return None
+        d = subprocess.run(["git", "-C", str(path), "status", "--porcelain", "--untracked-files=no"],
+                           capture_output=True, text=True)
+        return head + ("-dirty" if d.stdout.strip() else "")
     except Exception:
         return None
 

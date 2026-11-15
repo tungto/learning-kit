@@ -12,10 +12,15 @@ JSON, not TOML: `tomllib` needs Python ≥3.11 and this project travels between 
 
 `kit/config.py` resolves the project root in this order, never from `__file__`:
 
-1. `--project` / `--root` passed to a script
-2. `$LEARNING_PROJECT_ROOT`
-3. `$CLAUDE_PROJECT_DIR` (set by Claude Code, which is how the SessionStart hook finds it)
-4. an upward walk from the current directory looking for `learning.config.json`
+1. `--project` passed to a script. It must hold `learning.config.json`, or the script exits 2.
+2. `$LEARNING_PROJECT_ROOT`, then `$CLAUDE_PROJECT_DIR` (set by Claude Code, which is how the
+   SessionStart hook finds it), each used only if it holds `learning.config.json`. Claude Code is
+   often opened one folder above the project, so a config-less value is skipped, not trusted.
+3. an upward walk from the current directory looking for `learning.config.json`.
+   `append_row.py` walks up from the file it writes first, so the file's own project wins.
+
+No config found is an error (exit 2). The scripts never fall back to the bare defaults, because
+that would silently swap the causes, ladder and paths.
 
 Then the project file is merged over the defaults: dicts recursively, lists and scalars replaced
 whole. So overriding one phase means writing the whole `plan.phases` list.

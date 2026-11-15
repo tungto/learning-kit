@@ -66,10 +66,22 @@ def phase_of(week, phases):
     return None
 
 
+def passes_since_fail(cell, markers):
+    """Pass marks after the last fail mark. A fail sends the row back to the
+    first rung (principles 1.6), so passes before it no longer count."""
+    rx = marker_re([markers.get("pass"), markers.get("shaky"), markers.get("fail")])
+    n = 0
+    for m in rx.finditer(cell):
+        if m.group(1) == markers.get("fail", "fail"):
+            n = 0
+        elif m.group(1) == markers.get("pass", "✓"):
+            n += 1
+    return n
+
+
 def rung_index(cell, markers, ladder):
-    """How many rungs of the ladder this row has already passed."""
-    _, passed = split_retest(cell, markers)
-    return len(passed)
+    """How many rungs of the ladder this row has climbed since its last fail."""
+    return passes_since_fail(cell, markers)
 
 
 def next_rung(cell, markers, ladder, today, result="pass", shaky_days=3, fail_days=1):
@@ -80,14 +92,15 @@ def next_rung(cell, markers, ladder, today, result="pass", shaky_days=3, fail_da
     fail  -> mark today 'fail', append today + fail_days
     Returns (new_cell, label) where label is like '+7d' or 'retired'.
     """
-    pending, passed = split_retest(cell, markers)
-    marker = markers.get(result if result in ("shaky", "fail") else "pass")
+    if result not in ("pass", "shaky", "fail"):
+        raise ValueError(f"result must be pass, shaky or fail, not {result!r}")
+    marker = markers.get(result)
     base = cell.rstrip().rstrip(",")
     stamped = re.sub(rf"(?<![\w✓]){re.escape(today.isoformat())}", f"{marker}{today.isoformat()}", base, count=1)
     if stamped == base:
         stamped = f"{base}, {marker}{today.isoformat()}" if base else f"{marker}{today.isoformat()}"
     if result == "pass":
-        n = len(passed) + 1
+        n = passes_since_fail(cell, markers) + 1
         if n >= len(ladder):
             return stamped, "retired"
         gap = ladder[n]

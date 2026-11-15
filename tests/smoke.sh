@@ -1,17 +1,23 @@
 #!/bin/sh
 # Every kit script against the fixture, plus the negative controls and the wiring tests.
-# Usage: tests/smoke.sh            (from anywhere)
+# Usage: sh tests/smoke.sh         (from anywhere)
+# Runs against a temp copy of tests/fixture-project, so the tracked fixture stays clean.
 set -e
 KIT=$(cd "$(dirname "$0")/.." && pwd)
-FX="$KIT/tests/fixture-project"
 SC="${TMPDIR:-/tmp}/kit-smoke-$$"
+FX="${TMPDIR:-/tmp}/kit-fixture-$$"
+rm -rf "$FX"; cp -R "$KIT/tests/fixture-project" "$FX"
+trap 'rm -rf "$FX" "$SC"' EXIT
+unset CLAUDE_PROJECT_DIR LEARNING_PROJECT_ROOT
 fail=0
 ok()   { printf "  ok    %s\n" "$1"; }
 bad()  { printf "  FAIL  %s\n" "$1"; fail=$((fail+1)); }
 has()  { echo "$1" | grep -q "$2" && ok "$3" || bad "$3"; }
 
 echo "== fixture"
-python3 "$KIT/tests/make_fixture.py" >/dev/null && ok "rebuilt with today's dates"
+python3 "$KIT/tests/make_fixture.py" "$FX" >/dev/null && ok "rebuilt with today's dates (temp copy)"
+v=$(cat "$KIT/VERSION"); dv=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1]))['kit_version'])" "$KIT/kit/defaults.json")
+[ "$v" = "$dv" ] && ok "defaults.json kit_version matches VERSION" || bad "defaults.json kit_version $dv != VERSION $v"
 
 echo "== kit modules"
 python3 - "$KIT" <<'PY' && ok "dates + mdtable assertions"
@@ -26,6 +32,13 @@ assert p == [dt.date(2026,10,25)] and q == [dt.date(2026,10,20)]
 assert dates.next_rung("✓2026-10-20, +7d 2026-10-25", M, L, dt.date(2026,10,25), "pass")[1] == "+16d"
 assert dates.first_rung(dt.date(2026,11,2), L) == "2026-11-04, +7d 2026-11-09"
 assert mdtable.split_row("| a \\| b | c |") == ["a \\| b", "c"]
+# a fail drops the row back to the first rung (principles 1.6)
+T = dt.date(2026,11,20)
+cell = "✓2026-10-20, ✓2026-10-27, fail 2026-11-12, +1d 2026-11-13, ✓2026-11-13, +7d 2026-11-20"
+assert dates.passes_since_fail(cell, M) == 1
+assert dates.next_rung(cell, M, L, T, "pass")[1] == "+16d", dates.next_rung(cell, M, L, T, "pass")
+assert dates.next_rung("✓2026-10-20, ✓2026-10-27, ✓2026-11-03", M, L, T, "pass")[1] == "+90d"
+assert dates.next_rung("2026-11-20", M, L, T, "fail")[0] == "fail2026-11-20, +1d 2026-11-21"
 PY
 
 echo "== append_row"
@@ -39,6 +52,58 @@ if python3 "$KIT/skills/session-log/scripts/append_row.py" "$FX/topics/alpha/err
 else
   ok "bad Cause rejected, nothing written"
 fi
+AR="$KIT/skills/session-log/scripts/append_row.py"
+# write tests run on a copy under a skip-prefixed folder, so validate still sees a clean fixture
+mkdir -p "$FX/topics/_scratch"; cp "$FX/topics/alpha/error-log.md" "$FX/topics/_scratch/error-log.md"
+EL="$FX/topics/_scratch/error-log.md"
+printf '\n## Parking lot\n\n- parked idea\n' >> "$EL"
+before=$(grep -c '^|' "$EL")
+out=$(python3 "$AR" "$EL" 2026-01-06 "Smoke question one" A C concept drill "2026-01-08")
+has "$out" "ok: appended" "append_row appends a valid row"
+[ "$(grep -c '^|' "$EL")" = "$((before+1))" ] && ok "exactly one row added" || bad "exactly one row added"
+tail -1 "$EL" | grep -q "parked idea" && ok "Parking lot stays below the table" || bad "Parking lot stays below the table"
+out=$(python3 "$AR" "$EL" 2026-01-06 "smoke QUESTION one" A C concept drill "2026-01-08")
+has "$out" "skip" "duplicate (Date + Question, any case) skipped"
+out=$(python3 "$AR" "$EL" --retest "Smoke question one" pass --today 2026-01-08)
+has "$out" "+7d" "--retest pass climbs the ladder"
+grep -q "✓2026-01-08, +7d 2026-01-15" "$EL" && ok "--retest wrote only the Re-test cell" || bad "--retest cell"
+out=$(python3 "$AR" "$EL" --retest "Smoke question one" fail --today 2026-01-15)
+has "$out" "+1d" "--retest fail"
+out=$(python3 "$AR" "$EL" --retest "Smoke question one" pass --today 2026-01-16)
+has "$out" "+7d" "pass after a fail restarts at the first rung"
+if python3 "$AR" "$EL" --retest "zzz-no-such-row" pass >/dev/null 2>&1; then bad "--retest no match exits 2"; else ok "--retest no match exits 2"; fi
+python3 "$AR" "$FX/topics/_scratch/patterns.md" --init >/dev/null && grep -q "^| Trigger" "$FX/topics/_scratch/patterns.md" \
+  && ok "--init creates a table file with its header" || bad "--init"
+
+echo "== root lookup"
+NC="${TMPDIR:-/tmp}/kit-noconfig-$$"; mkdir -p "$NC"
+if (cd "$NC" && python3 "$KIT/skills/active-revise/scripts/due_reviews.py" >/dev/null 2>&1); then
+  bad "no config anywhere exits non-zero"
+else
+  ok "no config anywhere exits non-zero"
+fi
+if python3 "$KIT/skills/active-revise/scripts/due_reviews.py" --project "$NC" >/dev/null 2>&1; then
+  bad "--project without config exits non-zero"
+else
+  ok "--project without config exits non-zero"
+fi
+out=$(cd "$FX/topics" && CLAUDE_PROJECT_DIR="$NC" python3 "$KIT/skills/active-revise/scripts/due_reviews.py" --summary 2>&1)
+has "$out" "Re-tests as of" "CLAUDE_PROJECT_DIR without config falls through to the walk-up"
+rm -rf "$NC"
+
+echo "== nested layouts"
+NL="${TMPDIR:-/tmp}/kit-nested-$$"; mkdir -p "$NL/grammar/learning-records" "$NL/_skip/x" "$NL/topics/L0/js"
+printf '{"paths": {"topics_dir": "."}}\n' > "$NL/learning.config.json"
+hdr='| Date | Question | My answer | Correct | Cause | Fix drill | Re-test |\n|---|---|---|---|---|---|---|\n'
+printf "# g\n\n$hdr| 2026-01-01 | nested q | a | c | concept | d | 2026-01-03 |\n" > "$NL/grammar/learning-records/error-log.md"
+printf "# s\n\n$hdr| 2026-01-01 | skipped q | a | c | concept | d | 2026-01-03 |\n" > "$NL/_skip/x/error-log.md"
+printf "# js\n\n$hdr| 2026-01-01 | grouped q | a | c | concept | d | 2026-01-03 |\n" > "$NL/topics/L0/js/error-log.md"
+printf "| State | active |\n" > "$NL/topics/L0/js/TOPIC.md"
+out=$(python3 "$KIT/skills/active-revise/scripts/due_reviews.py" --project "$NL" --summary)
+has "$out" "grammar" "topics_dir '.' + nested learning-records -> topic 'grammar'"
+has "$out" "js" "grouped layout -> nearest TOPIC.md folder 'js'"
+if echo "$out" | grep -qE "learning-records|_skip|L0"; then bad "no record/skip/group folder named as a topic"; else ok "no record/skip/group folder named as a topic"; fi
+rm -rf "$NL"
 
 echo "== due_reviews"
 out=$(python3 "$KIT/skills/active-revise/scripts/due_reviews.py" --project "$FX")
@@ -109,6 +174,33 @@ else
   ok "malformed settings.json exits 2, nothing written"
 fi
 grep -q "oops" "$SC/.claude/settings.json" && ok "malformed settings.json untouched" || bad "settings untouched"
+rm -rf "$SC"
+
+echo "== installer: first install, --update, --check behind"
+mkdir -p "$SC/.claude/skills/teach"
+echo "# hand-made copy" > "$SC/.claude/skills/teach/SKILL.md"
+if python3 "$KIT/init_project.py" "$SC" --update --title smoke >/dev/null 2>&1; then
+  bad "--update without a manifest refuses"
+else
+  ok "--update without a manifest refuses"
+fi
+python3 "$KIT/init_project.py" "$SC" --title smoke >/dev/null
+grep -q "hand-made copy" "$SC/.claude/skills/teach/SKILL.md" && ok "first install keeps an existing file" || bad "first install overwrote an existing file"
+[ -f "$SC/.claude/skills/teach/SKILL.md.kit-new" ] && ok "first install writes .kit-new beside it" || bad "first install .kit-new"
+out=$(python3 "$KIT/init_project.py" "$SC" --check || true)
+has "$out" "BEHIND" "--check reports a kept file as behind the kit"
+rm -rf "$SC"; mkdir -p "$SC"
+python3 "$KIT/init_project.py" "$SC" --title smoke >/dev/null
+out=$(python3 "$KIT/init_project.py" "$SC" --check)
+has "$out" "up to date" "--check up to date after a clean install"
+python3 - "$SC/.claude/.kit-manifest.json" <<'PY'
+import json, sys
+p = sys.argv[1]; m = json.load(open(p))
+k = next(k for k in m["files"] if k.endswith("teach/SKILL.md")); m["files"][k] = "0" * 64
+open(p, "w").write(json.dumps(m))
+PY
+out=$(python3 "$KIT/init_project.py" "$SC" --check || true)
+has "$out" "BEHIND" "--check reports an older recorded hash as behind"
 rm -rf "$SC"
 
 echo

@@ -4,10 +4,15 @@
 Root resolution order (never from __file__, which breaks under symlinks and
 hardcodes how deep a skill script sits):
 
-  1. an explicit path passed in (--project / --root on a CLI)
-  2. $LEARNING_PROJECT_ROOT
-  3. $CLAUDE_PROJECT_DIR
-  4. walk up from the current directory until learning.config.json is found
+  1. an explicit path passed in (--project on a CLI): it must hold
+     learning.config.json, or this is an error (never a silent fallback)
+  2. $LEARNING_PROJECT_ROOT, then $CLAUDE_PROJECT_DIR, each used only if it
+     holds learning.config.json (Claude Code is often opened one level above
+     the project, where these point at a folder with no config)
+  3. walk up from the current directory until learning.config.json is found
+
+No config anywhere is an error. Loading the bare kit defaults would silently
+change causes, ladders and paths, so a script stops instead.
 
 Missing keys come from the kit defaults; unknown keys in the project file are
 reported on stderr and otherwise ignored, so a typo degrades to a default
@@ -31,18 +36,31 @@ def _defaults_path():
     return pathlib.Path(__file__).resolve().parent / DEFAULTS_NAME
 
 
+def walk_up(start):
+    """The nearest folder at or above start that holds learning.config.json, or None."""
+    here = pathlib.Path(start).expanduser().resolve()
+    if here.is_file():
+        here = here.parent
+    for p in [here, *here.parents]:
+        if (p / CONFIG_NAME).is_file():
+            return p
+    return None
+
+
 def find_root(project=None):
-    for cand in (project, os.environ.get("LEARNING_PROJECT_ROOT"), os.environ.get("CLAUDE_PROJECT_DIR")):
+    if project:
+        p = pathlib.Path(project).expanduser().resolve()
+        if (p / CONFIG_NAME).is_file():
+            return p
+        raise ConfigError(f"--project {p} has no {CONFIG_NAME}")
+    for cand in (os.environ.get("LEARNING_PROJECT_ROOT"), os.environ.get("CLAUDE_PROJECT_DIR")):
         if cand:
             p = pathlib.Path(cand).expanduser().resolve()
             if (p / CONFIG_NAME).is_file():
                 return p
-            if p.is_dir():
-                return p  # a project being initialised has no config yet
-    here = pathlib.Path.cwd().resolve()
-    for p in [here, *here.parents]:
-        if (p / CONFIG_NAME).is_file():
-            return p
+    found = walk_up(pathlib.Path.cwd())
+    if found:
+        return found
     raise ConfigError(
         f"no {CONFIG_NAME} found. Pass --project <dir>, set $LEARNING_PROJECT_ROOT, "
         f"or run from inside a project."
@@ -99,6 +117,37 @@ class Config:
     def skip_prefix(self):
         return str(self.get("paths.skip_prefix"))
 
+    def topic_of(self, path, topics_dir=None):
+        """Topic name for a file under the topics dir, whatever its depth.
+
+        The nearest folder above the file that holds the topic file (TOPIC.md)
+        wins, so grouped layouts (topics/L0/js/error-log.md -> js) and nested
+        records (grammar/learning-records/error-log.md -> grammar) both work.
+        Without a topic file, the first folder under the topics dir is the topic.
+        """
+        topics = pathlib.Path(topics_dir or self.topics_dir()).resolve()
+        path = pathlib.Path(path).resolve()
+        topic_file = self.file_name("topic")
+        for folder in path.parents:
+            if folder == topics or topics not in folder.parents:
+                break
+            if (folder / topic_file).is_file():
+                return folder.name
+        try:
+            parts = path.relative_to(topics).parts
+        except ValueError:
+            return path.parent.name
+        return parts[0] if len(parts) > 1 else topics.name
+
+    def skipped(self, path, topics_dir=None):
+        """True for files under a skip-prefixed or hidden folder of the topics dir."""
+        topics = pathlib.Path(topics_dir or self.topics_dir()).resolve()
+        try:
+            parts = pathlib.Path(path).resolve().relative_to(topics).parts[:-1]
+        except ValueError:
+            return False
+        return any(p.startswith((self.skip_prefix(), ".")) for p in parts)
+
     def profile_for(self, header):
         """Which table profile a header row belongs to, or None."""
         norm = [h.strip().lower() for h in header]
@@ -143,10 +192,19 @@ def add_args(ap):
 
 
 def from_args(a):
-    cfg = load(getattr(a, "project", None))
+    cfg = load_or_exit(getattr(a, "project", None))
     root_override = getattr(a, "root", None)
     topics = pathlib.Path(root_override).expanduser() if root_override else cfg.topics_dir()
     return cfg, topics
+
+
+def load_or_exit(project=None, quiet=False):
+    """load() for CLI scripts: a missing or broken config exits 2 with the reason."""
+    try:
+        return load(project, quiet)
+    except ConfigError as e:
+        print(f"error: {e}", file=sys.stderr)
+        sys.exit(2)
 
 
 def main():
@@ -155,7 +213,7 @@ def main():
     add_args(ap)
     ap.add_argument("keys", nargs="*", default=[])
     a = ap.parse_args()
-    cfg = load(a.project)
+    cfg = load_or_exit(a.project)
     print(f"root: {cfg.root}")
     print(f"topics: {cfg.topics_dir()}")
     for k in a.keys:

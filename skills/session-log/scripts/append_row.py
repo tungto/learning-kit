@@ -4,7 +4,11 @@
 Usage:
   append_row.py FILE CELL1 CELL2 ...          # row cells as args
   append_row.py FILE --check                  # print the profile and header, no write
-  [--project DIR]                             # project root, if not inferable from FILE
+  append_row.py FILE --init                   # create a missing table file (title + header + Parking lot)
+  append_row.py FILE --retest "QUESTION" pass|shaky|fail [--today YYYY-MM-DD]
+                                              # rewrite only the Re-test cell of the row whose
+                                              # Question contains QUESTION, along review.ladder_days
+  [--project DIR]                             # project root; default: walk up from FILE
 
 Rules:
 - The row must have exactly as many cells as the table header, else exit 2.
@@ -20,15 +24,19 @@ Rules:
 - Skips duplicates, ignoring case, on the profile's configured key: glossary
   and patterns on the first column (one row per term, one per trigger),
   the error log on Date + Question (the same question can come back later).
+- --retest computes the new cell with kit/dates.next_rung, so the ladder,
+  the markers and the fail-drops-to-first-rung rule are code, not prose.
+  QUESTION must match exactly one row (case-insensitive substring), else exit 2.
 """
 import argparse
-import os
+import datetime as dt
 import pathlib
 import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[3] / "kit"))
 import config as kcfg  # noqa: E402
+import dates as kdates  # noqa: E402
 import mdtable  # noqa: E402
 
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
@@ -61,11 +69,64 @@ def validate(profile, header, cells, cfg):
     return bad
 
 
+def init_file(path, cfg):
+    """Create a living table file (error log, glossary or patterns) with its header row."""
+    files = cfg.get("layout.files")
+    profile = next((n for n, f in files.items()
+                    if n in cfg.get("layout.tables") and pathlib.PurePosixPath(f).name == path.name), None)
+    if profile is None:
+        names = ", ".join(pathlib.PurePosixPath(files[n]).name for n in cfg.get("layout.tables") if n in files)
+        print(f"error: {path.name} is not a configured table file ({names})", file=sys.stderr)
+        return 2
+    if path.exists():
+        print(f"skip: {path} already exists")
+        return 0
+    topic = cfg.topic_of(path)
+    label = {"error_log": "error log", "glossary": "glossary", "patterns": "patterns"}[profile]
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(f"# {topic} {label}\n\n" + mdtable.render_table(cfg.table(profile))
+                    + "\n## Parking lot\n\n", encoding="utf-8")
+    print(f"ok: created {path}")
+    return 0
+
+
+def retest(path, header, query, result, today, cfg):
+    """Rewrite the Re-test cell of the one row whose Question contains query."""
+    if result not in ("pass", "shaky", "fail"):
+        print(f"error: result must be pass, shaky or fail, not '{result}'", file=sys.stderr)
+        return 2
+    qi, ri = mdtable.index_of(header, "Question"), mdtable.index_of(header, "Re-test")
+    if qi is None or ri is None:
+        print(f"error: {path} has no Question / Re-test columns", file=sys.stderr)
+        return 2
+    hits = [(n, c) for n, c in mdtable.read_rows(path, header)
+            if len(c) > max(qi, ri) and query.lower() in c[qi].lower()]
+    if len(hits) != 1:
+        print(f"error: '{query}' matches {len(hits)} rows; need exactly 1", file=sys.stderr)
+        for _, c in hits[:5]:
+            print(f"  - {c[qi]}", file=sys.stderr)
+        return 2
+    lineno, cells = hits[0]
+    new, label = kdates.next_rung(
+        cells[ri], cfg.get("review.markers"), cfg.get("review.ladder_days"), today, result,
+        int(cfg.get("review.shaky_days")), int(cfg.get("review.fail_days")))
+    cells = list(cells)
+    cells[ri] = new
+    lines = path.read_text(encoding="utf-8").split("\n")
+    lines[lineno - 1] = "| " + " | ".join(cells) + " |"  # read_rows line numbers are 1-based
+    path.write_text("\n".join(lines), encoding="utf-8")
+    print(f"ok: {result} -> {label}: {new}")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(add_help=False)
     ap.add_argument("file")
     ap.add_argument("cells", nargs="*")
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--init", action="store_true")
+    ap.add_argument("--retest", nargs=2, metavar=("QUESTION", "RESULT"), default=None)
+    ap.add_argument("--today", default=None)
     ap.add_argument("--project", default=None)
     ap.add_argument("-h", "--help", action="store_true")
     a, unknown = ap.parse_known_args()
@@ -75,24 +136,25 @@ def main():
     cells = [c for c in a.cells if c != "--check"] + [u for u in unknown if not u.startswith("--")]
 
     path = pathlib.Path(a.file)
-    project = a.project or os.environ.get("CLAUDE_PROJECT_DIR")
-    if not project:
-        # walk up from the file itself, so a bare relative path still resolves
-        p = path.resolve().parent
-        for cand in [p, *p.parents]:
-            if (cand / kcfg.CONFIG_NAME).is_file():
-                project = str(cand)
-                break
-    cfg = kcfg.load(project)
+    # the file's own project wins over $CLAUDE_PROJECT_DIR, which may point one level up
+    project = a.project or kcfg.walk_up(path.parent)
+    cfg = kcfg.load_or_exit(project)
+
+    if a.init:
+        return init_file(path, cfg)
 
     if not path.is_file():
-        print(f"error: no such file: {path}", file=sys.stderr)
+        print(f"error: no such file: {path} (create it with --init)", file=sys.stderr)
         return 2
     header = mdtable.header_of(path)
     if header is None:
         print(f"error: no table in {path}", file=sys.stderr)
         return 2
     profile = cfg.profile_for(header)
+
+    if a.retest:
+        today = dt.date.fromisoformat(a.today) if a.today else dt.date.today()
+        return retest(path, header, a.retest[0], a.retest[1], today, cfg)
 
     if a.check or not cells:
         print(f"profile={profile or 'unknown'} | " + " | ".join(header))

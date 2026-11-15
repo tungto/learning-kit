@@ -35,10 +35,6 @@ def kind(drill, types):
     return "recall"
 
 
-def skipped(rel, prefix):
-    return any(part.startswith(prefix) for part in pathlib.Path(rel).parts)
-
-
 def main():
     ap = argparse.ArgumentParser()
     kcfg.add_args(ap)
@@ -52,7 +48,6 @@ def main():
     ahead = a.ahead if a.ahead is not None else int(cfg.get("review.ahead_days"))
     markers = cfg.get("review.markers")
     types = cfg.get("review.types")
-    prefix = cfg.skip_prefix()
     log_name = cfg.file_name("error_log")
     show = int(cfg.get("review.cold_pool_show"))
 
@@ -60,9 +55,9 @@ def main():
     due, soon, cold = [], [], []
     for path in sorted(pathlib.Path(topics).glob(f"**/{log_name}")):
         rel = os.path.relpath(path, topics)
-        if skipped(rel, prefix):
+        if cfg.skipped(path, topics):
             continue
-        topic = path.parent.name
+        topic = cfg.topic_of(path, topics)
         if a.topic and a.topic not in topic:
             continue
         header = mdtable.header_of(path)

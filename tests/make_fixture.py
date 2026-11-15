@@ -4,13 +4,17 @@
 The fixture has to exercise due / soon / cold / stale-marker paths, and all of
 those are relative to the day the tests run, so the dates are stamped here
 instead of being frozen in the files.
+
+Usage: make_fixture.py [TARGET_DIR]   (default: tests/fixture-project; smoke.sh
+passes a temp copy so the tracked fixture never changes during a test run)
 """
 import datetime as dt
 import json
 import pathlib
+import sys
 
 HERE = pathlib.Path(__file__).resolve().parent
-FX = HERE / "fixture-project"
+FX = pathlib.Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else HERE / "fixture-project"
 TODAY = dt.date.today()
 MONDAY = TODAY - dt.timedelta(days=TODAY.weekday())
 

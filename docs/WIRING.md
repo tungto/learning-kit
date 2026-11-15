@@ -62,9 +62,14 @@ If `settings.json` is unparseable the installer writes nothing, prints the block
 ## Updating
 
 ```sh
-python3 .../init_project.py <project-dir> --update     # re-install kit-owned files
-python3 .../init_project.py <project-dir> --check       # audit, exit 1 on drift
+python3 .../init_project.py <project-dir> --update     # refresh an installation (needs its manifest)
+python3 .../init_project.py <project-dir> --check       # audit, exit 1 on drift or when behind the kit
 ```
+
+`--check` reports two things: local drift (a file differs from what was installed) and **behind**
+(the kit now ships a different file or version than the manifest recorded). A first install over
+existing files never overwrites them: each differing file is kept and the kit version lands as
+`.kit-new`. A skill folder with a `.kit-ignore` file is owned by the project and skipped.
 
 `--force` overwrites locally modified kit files and names each one. Use it only after reading the
 `.kit-new` diff.

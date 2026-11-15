@@ -1,6 +1,6 @@
 # learning-kit
 
-The domain-agnostic core of a working learning system: eight Claude Code skills, six scripts and
+The domain-agnostic core of a working learning system: nine Claude Code skills, six scripts and
 a markdown knowledge base, driven by one config file per project.
 
 It is the generalized form of the `interview-v2` study system. Nothing in here knows about any
@@ -54,7 +54,7 @@ a project installs: [docs/AI-SYSTEM-GUIDE.md](docs/AI-SYSTEM-GUIDE.md).
 |---|---|
 | `init_project.py` | installs or audits an installation (copy + sha256 manifest) |
 | `kit/` | `config.py`, `defaults.json`, `mdtable.py`, `dates.py` — installed to `<project>/.claude/kit/` |
-| `skills/` | the eight skills, installed one directory at a time |
+| `skills/` | the nine skills, installed one directory at a time |
 | `scripts/validate.py` | layout invariants, ladder hygiene, the state machine, review inflow |
 | `templates/` | the project-side files, created once and then owned by the project |
 | `docs/` | `CONFIG.md`, `WIRING.md`, `ADAPTING.md`, plus the two docs a project installs |
@@ -63,7 +63,5 @@ a project installs: [docs/AI-SYSTEM-GUIDE.md](docs/AI-SYSTEM-GUIDE.md).
 ## Tests
 
 ```sh
-python3 tests/make_fixture.py                                   # stamp today's dates
-python3 scripts/validate.py --project tests/fixture-project     # 0 errors, 0 warnings
-python3 tests/smoke.sh                                          # every script, both negatives
+sh tests/smoke.sh        # every script, both negatives, installer; runs on a temp copy of the fixture
 ```

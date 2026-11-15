@@ -10,7 +10,6 @@ cause histogram and the repeat-question list. Read-only.
 import argparse
 import collections
 import datetime as dt
-import os
 import pathlib
 import re
 import sys
@@ -31,7 +30,6 @@ def main():
 
     cfg, topics = kcfg.from_args(a)
     days = a.days if a.days is not None else int(cfg.get("review.error_window_days"))
-    prefix = cfg.skip_prefix()
     log_name = cfg.file_name("error_log")
     today = dt.date.today()
     since = today - dt.timedelta(days=days)
@@ -41,10 +39,9 @@ def main():
     questions = collections.Counter()
     total = 0
     for path in sorted(pathlib.Path(topics).glob(f"**/{log_name}")):
-        rel = os.path.relpath(path, topics)
-        if any(p.startswith(prefix) for p in pathlib.Path(rel).parts):
+        if cfg.skipped(path, topics):
             continue
-        topic = path.parent.name
+        topic = cfg.topic_of(path, topics)
         if a.topic and a.topic not in topic:
             continue
         header = mdtable.header_of(path)

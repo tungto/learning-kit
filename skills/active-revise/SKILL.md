@@ -50,41 +50,39 @@ python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/glossary.
 
    Write the row only from what the user actually said: their answer in their words, and a definition they produced. Never invent a definition for the glossary; if the user has not said it in their own words yet, ask them for one line first. Say in one line which rows you wrote. A glossary row for a term the user only heard from you is `no` in "Said aloud?" until they use it.
 
-5. **Reschedule** by updating only the Re-test cell of each reviewed row (use Edit, never touch other cells):
-
-| Result | Re-test cell |
-|---|---|
-| Pass | Mark today with the pass marker `✓`, add the next gap along `review.ladder_days`: +2d → +7d → +16d → +35d → +90d. After the last rung the row is retired. |
-
-   **A pass at `review.pattern_line_from_rung` (default +16d) or later earns a pattern line.** The ladder proves the item; the pattern sheet keeps what it taught once the row retires. Append one line to `topics/<name>/patterns.md` (create with `# <TOPIC> patterns` + the header row if missing), in the user's own words:
-
-```markdown
-| Trigger (when I see...) | Move (...I do) | From row |
-|---|---|---|
-| <the cue the user actually notices, their words> | <what they do about it, their words> | <row date> |
-```
-
-   Append it with the same script (it dedupes on the Trigger column):
+5. **Reschedule** each reviewed row with the script. It rewrites only the Re-test cell and computes the date from the config, so never edit the cell by hand:
 
 ```bash
+python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/error-log.md \
+  --retest "<words from the row's Question>" pass|shaky|fail
+```
+
+| Result | What the script writes |
+|---|---|
+| Pass | Marks today with `✓` and adds the next gap along `review.ladder_days` (+2d → +7d → +16d → +35d → +90d), counting only passes since the last fail. After the last rung the row is retired. |
+| Shaky | Marks today with `shaky` and adds a date at `review.shaky_days` (default +3d). |
+| Fail | Marks today with `fail` and adds a date at `review.fail_days` (default +1d). The row drops back to the first rung (`docs/principles.md` 1.6). Suggest the row's Fix drill now. |
+
+   If the Question words match 0 or 2+ rows, the script exits 2 and lists them. Use more words and re-run. Example of a pass: `2026-10-20, +7d 2026-10-25` → `✓2026-10-20, +7d 2026-10-25, ✓2026-10-25, +16d 2026-11-10`.
+
+   **A pass at `review.pattern_line_from_rung` (default +16d) or later earns a pattern line.** The ladder proves the item; the pattern sheet keeps what it taught once the row retires. Ask the user for one line in their own words (`docs/principles.md` 1.4: experts store "when I see X, the move is Y"), then append it. The script dedupes on the Trigger column, and `--init` creates the file if it is missing:
+
+```bash
+python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/patterns.md --init
 python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/patterns.md \
   "<trigger, user's words>" "<move, user's words>" "<row date>"
 ```
 
-   Trigger and Move are the user's wording - ask for the one line, do not write it for them (`docs/principles.md` 1.4: experts store "when I see X, the move is Y"). One line per row, never a paragraph. Skip it if the pattern is already in the file.
-| Shaky | Mark today with `shaky`, add a new date at `review.shaky_days` (default +3d) |
-| Fail | Mark today with `fail`, add a new date at `review.fail_days` (default +1d), and suggest the row's Fix drill now |
+   One line per row, never a paragraph. Skip it if the pattern is already in the file.
 
-   **Always write a result marker (`✓`, `shaky` or `fail`) in front of the date you reviewed on.** The script treats every date after the last marked one as still scheduled, so an unmarked date it has already passed makes the row report as overdue forever. `validate.py` warns when it finds one.
-
-   Example: `2026-10-20, +7d 2026-10-25` → `✓2026-10-20, +7d 2026-10-25, +16d 2026-11-10`. Use today's date from the environment. If the same row fails `review.fail_streak_escalate` times (default 3), flag it as a concept gap for `error-diagnose` instead of looping.
+   If the same row fails `review.fail_streak_escalate` times (default 3), flag it as a concept gap for `error-diagnose` instead of looping.
    A right answer at confidence 1 or 2 is shaky, not a pass: the user guessed or half-guessed, so the row keeps its place on the ladder.
 6. **Close.** Report: items passed / shaky / failed, confident-but-wrong items, **every gap named in the gap hunt** (one line each, specific), next due date, and the one weakest idea. Do not praise in general terms. Remind: same-day success is fluency; only passes at the later gaps (+7d and beyond) count as learned.
 
 ## Do not
 
 - Show the Correct column before the user attempts.
-- Write any cell of an error-log row other than a new row you append, or any `TOPIC.md` cell. Levels, states and hours stay with `session-log` and `coach`.
+- Write any error-log cell other than the Re-test cell (through `--retest`) and new rows you append, or any `TOPIC.md` cell. Levels, states and hours stay with `session-log` and `coach`.
 - Quiz more than `review.cap_per_run` due items in one run. Leave the rest due; tomorrow's run picks them up.
 - Write a `patterns.md` line in your own words, or for a row that has not reached the pattern rung yet.
 - Track real time. Pacing is by content, not clock.

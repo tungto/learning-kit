@@ -20,8 +20,9 @@ project gets its own `CLAUDE.md` from `templates/CLAUDE.md`.
    rule.
 5. **One writer per file** stays the architecture. A new skill that writes a file another skill
    owns is wrong, however convenient.
-6. **Tests before a commit:** `python3 tests/make_fixture.py && tests/smoke.sh`. The fixture
-   must come back 0 errors, 0 warnings, and both negative controls must still fail.
+6. **Tests before a commit:** `sh tests/smoke.sh` (it stamps a temp copy of the fixture, so
+   tracked files stay clean). The fixture must come back 0 errors, 0 warnings, and both
+   negative controls must still fail.
 
 ## When changing a script
 
