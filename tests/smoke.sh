@@ -193,14 +193,18 @@ rm -rf "$SC"; mkdir -p "$SC"
 python3 "$KIT/init_project.py" "$SC" --title smoke >/dev/null
 out=$(python3 "$KIT/init_project.py" "$SC" --check)
 has "$out" "up to date" "--check up to date after a clean install"
-python3 - "$SC/.claude/.kit-manifest.json" <<'PY'
-import json, sys
-p = sys.argv[1]; m = json.load(open(p))
-k = next(k for k in m["files"] if k.endswith("teach/SKILL.md")); m["files"][k] = "0" * 64
-open(p, "w").write(json.dumps(m))
+# simulate an older install: the file and its recorded hash both differ from the kit's file
+echo "# older kit text" >> "$SC/.claude/skills/teach/SKILL.md"
+python3 - "$SC" <<'PY'
+import hashlib, json, pathlib, sys
+root = pathlib.Path(sys.argv[1]); p = root / ".claude/.kit-manifest.json"; m = json.loads(p.read_text())
+k = next(k for k in m["files"] if k.endswith("teach/SKILL.md"))
+m["files"][k] = hashlib.sha256((root / k).read_bytes()).hexdigest()
+p.write_text(json.dumps(m))
 PY
 out=$(python3 "$KIT/init_project.py" "$SC" --check || true)
-has "$out" "BEHIND" "--check reports an older recorded hash as behind"
+has "$out" "BEHIND" "--check reports an older installed file as behind"
+if echo "$out" | grep -q "1 drifted"; then bad "older file is not local drift"; else ok "older file is not local drift"; fi
 touch "$SC/.claude/skills/teach/.kit-ignore"
 out=$(python3 "$KIT/init_project.py" "$SC" --check)
 has "$out" "up to date" "--check skips a .kit-ignore skill"
