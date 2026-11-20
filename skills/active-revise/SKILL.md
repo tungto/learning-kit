@@ -9,6 +9,10 @@ Goal: make old knowledge stick by forcing recall at growing gaps. The user answe
 
 Config: `review.*` in `learning.config.json` holds the ladder, the caps and the markers. The numbers quoted below are the defaults.
 
+## Learning style (user's own rules)
+
+Follow `paths.style_file` from `learning.config.json` (default `LEARNING-STYLE.md`, project root; skip silently if absent). Here: on a fail, give a hint before the answer and let the user try once more; when an item fails again, re-explain with a different example or angle than last time (check the row's Fix drill). Feedback says what is right, what is wrong, why, how to improve. No empty praise. A memorized definition is not a pass: ask the user to apply or explain it.
+
 ## Steps
 
 1. **Find what is due.** Run:

@@ -1,6 +1,6 @@
 ---
 name: session-log
-description: End-of-session logging for any learning session. Turns what happened into rows in the topic's `error-log.md` (date, question, my answer, correct, cause, fix drill, re-test), `glossary.md` (one-line cheat-sheet rows, own words, no cap) and `deep-dive.md` (long answers), plus a few flashcards and the next review dates. Use whenever the user says "log session", "update glossary", "add to error log", "I got X wrong", "log my mistakes", "make flashcards", "wrap up", "end session", or finishes a learn-session, teach lesson or perform-drill, even if they do not mention files. Acts as the Clerk role: it organizes, it never adds new knowledge the user did not produce.
+description: End-of-session logging for any learning session. Turns what happened into rows in the topic's `error-log.md` (date, question, my answer, correct, cause, fix drill, re-test), `glossary.md` (one-line cheat-sheet rows, plain AI-written definitions, no cap) and `deep-dive.md` (long answers), plus a few flashcards and the next review dates. Use whenever the user says "log session", "update glossary", "add to error log", "I got X wrong", "log my mistakes", "make flashcards", "wrap up", "end session", or finishes a learn-session, teach lesson or perform-drill, even if they do not mention files. Acts as the Clerk role: it organizes, it never adds new knowledge the user did not produce.
 ---
 
 # Session log (Clerk)
@@ -14,7 +14,7 @@ Column sets differ per file and are declared in `layout.tables`, so always run `
 
 ## Why
 
-The error log is the raw data for weekly root-cause analysis (`error-diagnose`). A row that is vague, or whose cause is guessed, poisons the pattern search. So rows must be specific and the user, not you, decides cause. The glossary is for terms the user can define alone, so definitions come from the user's wording.
+The error log is the raw data for weekly root-cause analysis (`error-diagnose`). A row that is vague, or whose cause is guessed, poisons the pattern search. So rows must be specific and the user, not you, decides cause. The glossary is a quick lookup: definitions are written by the AI in plain English at `esl.level` (user rule, 2026-11-19), so the user can read them fast.
 
 ## Steps
 
@@ -29,10 +29,10 @@ The error log is the raw data for weekly root-cause analysis (`error-diagnose`).
    - **English rows: one row per language pattern**, not per sentence. "drops `is` in passives" is one row however many times it happened.
 
    For each: one row. Fill Question (short), My answer (what the user really said), Correct (one line), Fix drill (a 10-15 min targeted drill, e.g. "five fresh cases, predict the outcome before checking"), Re-test (today + the first ladder gap, written as `YYYY-MM-DD`; also note the second gap in the cell). Ask the user to pick **Cause** from `grading.causes` (default `concept`, `careless`, `English`; `grading.cause_help` says what each means). Offer your reading as a suggestion only. Wait for their pick.
-4. **Glossary (cheat sheet).** Log **every** word the user did not know this session. No cap. Ask the user for the definition in their words first (answer-first rule). If they cannot, give a short hint, not the definition, and ask again. A word they still cannot define at session end goes to the Parking lot as a bullet, to resolve next session - not dropped.
+4. **Glossary (cheat sheet).** Log **every** word the user did not know this session. No cap. Write the definition yourself (user rule, 2026-11-19: do not ask for their words): plain English at the `esl.level` (default B1), short common words, no jargon inside the definition. Recall practice happens in `active-revise`, not here.
 
    The glossary is a quick reference the user scans before performing, so **every cell is one line**:
-   - **Simple definition (my words)**: ONE sentence, ~20 words max, the user's own wording (fix grammar only). No bold labels, no paragraphs.
+   - **Simple definition (my words)**: ONE sentence, ~20 words max, plain English written by the AI (the column keeps its old name for the scripts). No bold labels, no paragraphs.
      - ESL gloss: when the term is a normal English word used in a special way, add the plain meaning in parens, 8 words max - `lexical (= as written in the text)`. Skip for pure symbols and acronyms.
    - **Code**: one snippet, formula or `input -> output`, one line. For a non-code domain, the smallest concrete instance.
    - **Related / not same as**: `vs X (one-clause difference)` for things the user may confuse, plus `see: [[term]]` for the neighbours worth learning together. These point at other rows in the same glossary.

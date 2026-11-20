@@ -5,6 +5,10 @@ description: Run a timed, pressured performance round on something the user has 
 
 # Perform drill (Sparring Partner)
 
+## Learning style (user's own rules)
+
+Follow `paths.style_file` from `learning.config.json` (default `LEARNING-STYLE.md`, project root; skip silently if absent). Pressure stays realistic during the round, but the debrief uses the user's feedback format: what was right, what was wrong, why, how to improve, plus the next exercise adapted to the weakest answer. Challenge assumptions and ask the user to justify decisions. No empty praise.
+
 ## Why
 
 Knowing a topic and performing it under time pressure are different skills. Answers fail on vagueness, length and hesitation, not only on facts. The drill trains those, and the output feeds the error log.

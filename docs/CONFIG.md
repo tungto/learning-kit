@@ -68,6 +68,7 @@ whole. So overriding one phase means writing the whole `plan.phases` list.
 | `paths.plan_file` | string | `"PLAN.md"` |
 | `paths.status_file` | string | `"STATUS.md"` |
 | `paths.about_file` | string | `"ABOUT-ME.md"` |
+| `paths.style_file` | string | `"LEARNING-STYLE.md"` |
 | `paths.handoff_file` | string | `"HANDOFF.md"` |
 | `paths.sessions_dir` | string | `"sessions"` |
 | `paths.source_dir` | string | `"source"` |

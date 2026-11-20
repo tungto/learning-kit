@@ -7,6 +7,10 @@ description: Operator for this project's learning plan. Reads the plan, the stat
 
 Files hold the state; the user only shows up. Keep the files true and the next step obvious. The failure this guards against is the system abandoned after two weeks because nobody could say what was next or how far it had come.
 
+## Learning style (user's own rules)
+
+Follow `paths.style_file` from `learning.config.json` (default `LEARNING-STYLE.md`, project root; skip silently if absent). The coach never teaches, but its brief respects the style: short, one clear next step with its objective (what the user will be able to do after), and it never books passive reading or video without a practice block after it. Do not move a topic to advanced work while a foundation gap is open. Feedback on a done/skipped day is specific, no empty praise.
+
 ## Files (project root: the folder holding `learning.config.json`)
 
 | File | Role | Who writes |

@@ -41,8 +41,8 @@ A lesson that wants a rail is two lessons. A reference page with fewer than 6 se
 - **Comparisons are tables,** not parallel paragraphs. Two or more items compared on two or more
   attributes → table.
 - **Principles are a `.kv` grid**: term (short noun phrase) + one testable sentence. 3-6 cells.
-- **Citations** (`teach.require_citations`, default `true`): every factual claim links its source
-  inline. The primary source also sits in the masthead `.meta` and in "Next step".
+- **Citations** (`teach.require_citations`, default `true`): key claims link their source
+  inline (not every line). The primary source also sits in the masthead `.meta` and in "Next step".
 - **Language**: write in the user's language (from `NOTES.md`); keep technical terms in their
   original form inside `<code>` or with a `.sub` gloss after the heading. Set `<html lang>` and the
   `data-ui-*` button words on `<body>` to match.
@@ -103,7 +103,7 @@ what, what crosses a boundary. Decoration is not a reason.
 - [ ] `h1` ≤ 20ch, lede says what the page is not.
 - [ ] Section numbers continuous; rail links (reference) match ids and titles.
 - [ ] Every section opens with its claim; no paragraph over 4 sentences.
-- [ ] Every factual claim has a link; one primary source named.
+- [ ] Key claims have a link; one recommended source named; lessons follow the nine-section flow.
 - [ ] Every `.note-label` is a claim or question.
 - [ ] Every SVG has `role="img"`, `aria-label`, a `.dia-cap`; animated ones have Pause/Restart.
 - [ ] No inline colours outside SVG `var(--...)` references; no new hex codes in the page.

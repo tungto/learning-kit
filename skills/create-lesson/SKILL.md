@@ -71,12 +71,15 @@ The kit ships the starting point in this skill's `assets/`:
 
 ## What every lesson carries
 
-- **Citations** (`teach.require_citations`, default `true`). Lessons should be littered with
-  citations - links to external resources to back up any claim made. A claim with no link is the
-  AI's memory, not knowledge. Draw them from `RESOURCES.md`; when a lesson earns a new trusted
-  source, add it there.
-- **One primary source** to read or watch: the most high-quality, high-trust resource found on the
-  topic.
+- **The nine-section flow** from [teach](../teach/SKILL.md) (Learning style -> HTML layout):
+  Objectives, Prerequisite check, Concept, Guided reasoning, Your attempt (answer and hints behind
+  `<details>`, hints first), Feedback notes, Practical application, Knowledge check, Summary + next
+  step; a "Guess first" box before Concept for cold material. Reference pages keep their
+  compressed shape.
+- **Citations** (`teach.require_citations`, default `true`): cite key claims where useful, not
+  every line. Official docs and popular, well-regarded resources both count. Draw them from
+  `RESOURCES.md` when it exists; when a lesson earns a new good source, add it there.
+- **One recommended source** to read or watch: the best one found, official or popular.
 - **A reminder to ask followup questions to the agent.** The agent is their teacher, and can assist
   with anything that's unclear.
 - **Links via HTML anchors** to other lessons and reference documents.

@@ -1,6 +1,6 @@
 # RESOURCES.md Format
 
-`RESOURCES.md` is the curated set of trusted sources for this topic. Knowledge for explainers should be drawn from here, not from parametric guesses. Wisdom comes from the communities listed here.
+`RESOURCES.md` is the curated set of useful sources (official and popular) for this topic. Knowledge for explainers should be drawn from here, not from parametric guesses. Wisdom comes from the communities listed here.
 
 ## Structure
 
@@ -24,7 +24,7 @@
 
 ## Rules
 
-- **High-trust only.** Prefer primary sources, recognised experts, peer-reviewed work, and communities with strong moderation. If a resource is marketing dressed as education, leave it out.
+- **Good and useful, not only official.** Official docs, recognised experts, and popular, well-regarded resources (blogs, courses, YouTube, books, newsletters) all count. Leave out marketing dressed as education or content known to be wrong.
 - **Annotate every entry.** A bare link is useless in three months. Add one line: what it covers and when to reach for it.
 - **Group by Knowledge / Wisdom.** Mirrors the philosophy in [SKILL.md](./SKILL.md). It is fine for a resource to appear in only one group.
 - **Surface gaps explicitly.** If no good resource exists for an area the mission needs, write a `## Gaps` section listing what is missing. This drives future search.

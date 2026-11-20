@@ -1,5 +1,5 @@
 {
-  "kit_version": "0.3.0",
+  "kit_version": "0.4.0",
 
   "project": {
     "name": "",
@@ -12,6 +12,7 @@
     "plan_file": "PLAN.md",
     "status_file": "STATUS.md",
     "about_file": "ABOUT-ME.md",
+    "style_file": "LEARNING-STYLE.md",
     "handoff_file": "HANDOFF.md",
     "sessions_dir": "sessions",
     "source_dir": "source",

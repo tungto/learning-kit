@@ -47,6 +47,7 @@ PROJECT_FILES = {  # template -> destination
     "templates/PLAN.md": "PLAN.md",
     "templates/STATUS.md": "STATUS.md",
     "templates/ABOUT-ME.md": "ABOUT-ME.md",
+    "templates/LEARNING-STYLE.md": "LEARNING-STYLE.md",
     "templates/gitignore": ".gitignore",
 }
 KIT_FILES = {  # kit path -> destination
@@ -106,6 +107,7 @@ def substitutions(project, cfg, title):
         "PLAN_FILE": paths["plan_file"],
         "STATUS_FILE": paths["status_file"],
         "ABOUT_FILE": paths["about_file"],
+        "STYLE_FILE": paths.get("style_file", "LEARNING-STYLE.md"),
         "CAUSES": ", ".join(f"`{c}`" for c in grading["causes"]),
         "LADDER": ", ".join(f"+{d}d" for d in review["ladder_days"]),
         "GAP_EXAMPLE": "<one real gap from this project, phrased as a testable sentence>",
@@ -362,7 +364,8 @@ def main():
     # 1. project files: create if absent, never touched again. Plan, status and about
     #    go to the paths the project config names (a project may keep its plan as HTML).
     configured = {"PLAN.md": subs["PLAN_FILE"], "STATUS.md": subs["STATUS_FILE"],
-                  "ABOUT-ME.md": subs["ABOUT_FILE"]}
+                  "ABOUT-ME.md": subs["ABOUT_FILE"],
+                  "LEARNING-STYLE.md": subs["STYLE_FILE"]}
     for tpl, dest in PROJECT_FILES.items():
         dst = project / configured.get(dest, dest)
         if dst.exists():
