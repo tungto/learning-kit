@@ -48,8 +48,10 @@ Date: `date +%Y-%m-%d`, `date +%A`. Never guess. The week number comes from `pla
 
 ## Context (one call, before any mode)
 
+In the mode files, `<coach-dir>` means `${CLAUDE_SKILL_DIR}`.
+
 ```bash
-python3 .claude/skills/coach/scripts/brief_context.py <today|status|weekly|topic NAME> --project .
+python3 ${CLAUDE_SKILL_DIR}/scripts/brief_context.py <today|status|weekly|topic NAME> --project .
 ```
 
 It prints the date and week, the status-file sections that mode needs (`coach.status_sections`), the
@@ -62,7 +64,7 @@ about file whole. Pull a single plan section only when a mode asks for it
 
 | Mode | File |
 |---|---|
-| today | `.claude/skills/coach/modes/today.md` |
+| today | `${CLAUDE_SKILL_DIR}/modes/today.md` |
 | done / skipped | `.../modes/done.md` |
 | weekly review | `.../modes/weekly.md` |
 | status | `.../modes/status.md` |

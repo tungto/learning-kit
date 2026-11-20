@@ -1,0 +1,7 @@
+{
+  "name": "learning-kit",
+  "description": "Domain-agnostic learning system: coach, teach, learn-session, active-revise, perform-drill, session-log, error-diagnose, sync-progress, create-lesson. Driven by learning.config.json in each project.",
+  "author": { "name": "tungto" },
+  "repository": "https://github.com/tungto/learning-kit",
+  "keywords": ["learning", "spaced-repetition", "study"]
+}

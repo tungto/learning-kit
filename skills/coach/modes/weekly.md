@@ -1,6 +1,6 @@
 ## Mode: weekly review
 
-1. Run `python3 .claude/skills/coach/scripts/brief_context.py weekly --project .` — one call: the status
+1. Run `python3 <coach-dir>/scripts/brief_context.py weekly --project .` — one call: the status
    file, plan §4 (this week + next 2) and §6, `status_derive.py`, the error rows for
    `review.weekly_window_days`, the due headlines and `validate.py`. Then read only the
    `active`/`passed` `TOPIC.md` files. Any ERROR line: report it and fix the named file before step 2,

@@ -55,8 +55,8 @@ The error log is the raw data for weekly root-cause analysis (`error-diagnose`).
 5. **Write rows** with the script (keeps the table intact, handles `|`, skips duplicates). `deep-dive.md` is prose - append it by hand, not with the script:
 
 ```bash
-python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/error-log.md --check
-python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/error-log.md \
+python3 ${CLAUDE_SKILL_DIR}/scripts/append_row.py topics/<name>/error-log.md --check
+python3 ${CLAUDE_SKILL_DIR}/scripts/append_row.py topics/<name>/error-log.md \
   "<today>" "<question>" "<my answer>" "<correct, one line>" "<cause>" "<fix drill>" "<today+2d>, +7d <today+7d>"
 ```
 
@@ -65,7 +65,7 @@ python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/error-log
    The script rejects an error-log row with any empty cell, a `Cause` outside the configured set,
    or a `Re-test` without a `YYYY-MM-DD` date, and writes nothing. Do not invent a value to get
    past it: ask the user for the missing piece, then re-run.
-   Then check the rows you just wrote: `python3 scripts/validate.py --project . --topic <name>`. An ERROR
+   Then check the rows you just wrote: `python3 ${CLAUDE_SKILL_DIR}/../../scripts/validate.py --project . --topic <name>`. An ERROR
    names a malformed cell (bad `Cause`, a `Re-test` cell with no date, a wrong cell count) - fix
    it now, while the row is still in front of you.
 

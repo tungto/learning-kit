@@ -18,7 +18,7 @@ Follow `paths.style_file` from `learning.config.json` (default `LEARNING-STYLE.m
 1. **Find what is due.** Run:
 
 ```bash
-python3 .claude/skills/active-revise/scripts/due_reviews.py --project .
+python3 ${CLAUDE_SKILL_DIR}/scripts/due_reviews.py --project .
 ```
 
    It lists rows with a pending Re-test date ≤ today (oldest first), rows due within `review.ahead_days`, and a COLD pool (rows already passed once, oldest last pass first). Each row has a `type` hint: `recall`, `skill` or `speak`. The "Correct" line is for you, never show it before the attempt. If nothing is due, say so, then go to step 3 only.
@@ -46,9 +46,9 @@ python3 .claude/skills/active-revise/scripts/due_reviews.py --project .
 4. **Log the gaps as you find them.** Every gap named in a gap hunt, and every cold item that fails, becomes a row *in this run* - do not carry it to the wrap-up. Append with the session-log script, which validates the row and skips duplicates:
 
 ```bash
-python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/error-log.md \
+python3 ${CLAUDE_SKILL_DIR}/../session-log/scripts/append_row.py topics/<name>/error-log.md \
   "<today>" "<question>" "<my answer>" "<correct>" "<cause from grading.causes>" "<fix drill>" "<today>, +1d <date>"
-python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/glossary.md \
+python3 ${CLAUDE_SKILL_DIR}/../session-log/scripts/append_row.py topics/<name>/glossary.md \
   "<term>" "<definition in the user's words>" "<example>" "<related / not same as>" "<no>"
 ```
 
@@ -57,7 +57,7 @@ python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/glossary.
 5. **Reschedule** each reviewed row with the script. It rewrites only the Re-test cell and computes the date from the config, so never edit the cell by hand:
 
 ```bash
-python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/error-log.md \
+python3 ${CLAUDE_SKILL_DIR}/../session-log/scripts/append_row.py topics/<name>/error-log.md \
   --retest "<words from the row's Question>" pass|shaky|fail
 ```
 
@@ -72,8 +72,8 @@ python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/error-log
    **A pass at `review.pattern_line_from_rung` (default +16d) or later earns a pattern line.** The ladder proves the item; the pattern sheet keeps what it taught once the row retires. Ask the user for one line in their own words (`docs/principles.md` 1.4: experts store "when I see X, the move is Y"), then append it. The script dedupes on the Trigger column, and `--init` creates the file if it is missing:
 
 ```bash
-python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/patterns.md --init
-python3 .claude/skills/session-log/scripts/append_row.py topics/<name>/patterns.md \
+python3 ${CLAUDE_SKILL_DIR}/../session-log/scripts/append_row.py topics/<name>/patterns.md --init
+python3 ${CLAUDE_SKILL_DIR}/../session-log/scripts/append_row.py topics/<name>/patterns.md \
   "<trigger, user's words>" "<move, user's words>" "<row date>"
 ```
 

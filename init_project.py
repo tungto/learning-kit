@@ -7,6 +7,8 @@ Usage:
   --dry-run           print every action, write nothing
   --update            refresh an existing installation (needs its manifest; refuses otherwise)
   --check             read-only audit: local drift, behind-the-kit files, config keys, hook
+  --plugin            plugin mode: project files + topics only, and enable the learning-kit
+                      plugin at project scope in .claude/settings.json (no skill/kit copies)
   --link              symlink skill dirs instead of copying them (see docs/WIRING.md)
   --force             overwrite a locally modified kit-owned file (prints each one)
   --seed-topics a,b,c create those topic folders from the templates
@@ -55,6 +57,11 @@ KIT_FILES = {  # kit path -> destination
     "docs/AI-SYSTEM-GUIDE.md": "docs/AI-SYSTEM-GUIDE.md",
     "docs/principles.md": "docs/principles.md",
 }
+COPY_ONLY_FILES = [  # (kit path, destination); copy/link mode: skills call <skills>/../../scripts/
+    ("scripts/validate.py", ".claude/scripts/validate.py"),
+]
+PLUGIN_ID = "learning-kit@learning-kit"
+MARKETPLACE = {"learning-kit": {"source": {"source": "github", "repo": "tungto/learning-kit"}}}
 
 
 def sha(path):
@@ -205,6 +212,41 @@ def merge_settings(project, rep, dry):
     return True
 
 
+def enable_plugin(project, rep, dry):
+    """Plugin mode: register the marketplace and enable the plugin for this project only."""
+    path = project / ".claude" / "settings.json"
+    data = {}
+    if path.exists():
+        data, err = load_json(path)
+        if data is None:
+            print(f"\nerror: {path} is not valid JSON ({err}). Nothing written.")
+            return False
+    before = json.dumps(data, indent=2, ensure_ascii=False)
+    data.setdefault("extraKnownMarketplaces", {}).update(MARKETPLACE)
+    data.setdefault("enabledPlugins", {})[PLUGIN_ID] = True
+    # a copied-kit hook would double the plugin's own SessionStart line
+    hooks = data.get("hooks", {}).get("SessionStart", [])
+    kept = [h for h in hooks if HOOK_MARK not in json.dumps(h)]
+    if hooks and len(kept) != len(hooks):
+        data["hooks"]["SessionStart"] = kept
+        if not kept:
+            del data["hooks"]["SessionStart"]
+        if not data["hooks"]:
+            del data["hooks"]
+    after = json.dumps(data, indent=2, ensure_ascii=False)
+    if before == after:
+        rep.add("plugin enabled", path)
+        return True
+    rep.add("merge" if path.exists() else "create", path, f"enable {PLUGIN_ID}")
+    if not dry:
+        if path.exists():
+            stamp = dt.datetime.now().strftime("%Y-%m-%d-%H%M%S")
+            shutil.copy2(path, path.with_name(f"settings.json.bak-{stamp}"))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(after + "\n", encoding="utf-8")
+    return True
+
+
 def seed_topic(project, name, subs, cfg, rep, dry):
     topics = project / subs["TOPICS_DIR"] / name
     if topics.exists():
@@ -307,7 +349,7 @@ def kit_sources(project):
     out = [(str(pathlib.Path(".claude/kit") / s.relative_to(KIT / "kit")), s) for s in walk(KIT / "kit")]
     for skill in sorted(p for p in (KIT / "skills").iterdir() if p.is_dir()):
         out += [(str(pathlib.Path(".claude/skills") / skill.name / s.relative_to(skill)), s) for s in walk(skill)]
-    out += [(dest, KIT / src) for src, dest in KIT_FILES.items()]
+    out += [(dest, KIT / src) for src, dest in [*KIT_FILES.items(), *COPY_ONLY_FILES]]
     return out
 
 
@@ -324,6 +366,7 @@ def main():
     ap.add_argument("--update", action="store_true")
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--link", action="store_true")
+    ap.add_argument("--plugin", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--seed-topics", default="")
     ap.add_argument("--git-init", action="store_true")
@@ -379,6 +422,31 @@ def main():
         cfg, _ = load_json(project / CONFIG)
         subs = substitutions(project, cfg, a.title)
 
+    if a.plugin:
+        for name in [n.strip() for n in a.seed_topics.split(",") if n.strip()]:
+            seed_topic(project, name, subs, cfg, rep, dry)
+        topics_dir = project / subs["TOPICS_DIR"]
+        if not topics_dir.exists():
+            rep.add("create", topics_dir)
+            if not dry:
+                topics_dir.mkdir(parents=True, exist_ok=True)
+        ok = enable_plugin(project, rep, dry)
+        if a.git_init and not (project / ".git").exists():
+            rep.add("git init", project, "branch main, no commit")
+            if not dry:
+                subprocess.run(["git", "init", "-b", "main"], cwd=project, check=False,
+                               capture_output=True)
+        print(f"\ncreated {rep.count('create')}, skipped {rep.count('skip (exists)')}")
+        if not ok:
+            return 2
+        print(f"""
+Next:
+  1. fill in {CONFIG}, PLAN.md and ABOUT-ME.md (the templates mark every blank)
+  2. open Claude Code here, trust the folder, then once per clone/device:
+       claude plugin install {PLUGIN_ID} --scope project
+  3. /coach today""")
+        return 0
+
     # 2. the kit module dir, always refreshed
     for src in walk(KIT / "kit"):
         dst = project / ".claude" / "kit" / src.relative_to(KIT / "kit")
@@ -412,7 +480,7 @@ def main():
                 files[str(dst.relative_to(project))] = h
 
     # 4. kit-owned docs and scripts
-    for src_rel, dest in KIT_FILES.items():
+    for src_rel, dest in [*KIT_FILES.items(), *COPY_ONLY_FILES]:
         h = copy_kit_file(KIT / src_rel, project / dest, manifest, rep, dry, a.force)
         if h:
             files[str(dest)] = h

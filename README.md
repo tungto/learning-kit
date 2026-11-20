@@ -7,7 +7,41 @@ It is the generalized form of the `interview-v2` study system. Nothing in here k
 one subject — a project supplies `learning.config.json`, `PLAN.md` and its topics, and gets the
 same machinery.
 
-## Quickstart
+## Quickstart (plugin, recommended)
+
+The repo is both the plugin and its own marketplace. Skills load from the plugin, so a fix
+pushed here reaches every learning repo on the next `claude plugin update`; nothing is copied.
+
+One-time per device (private repo: git must already reach GitHub, e.g. `gh auth setup-git`):
+
+```sh
+claude plugin marketplace add tungto/learning-kit
+```
+
+New learning repo:
+
+```sh
+mkdir -p ~/LEARNING/SWE/my-subject && cd ~/LEARNING/SWE/my-subject
+python3 ~/LEARNING/SWE/learning-kit/init_project.py . --plugin \
+        --title "What I am learning and why" --seed-topics basics,practice --git-init
+claude plugin install learning-kit@learning-kit --scope project   # once per clone/device
+```
+
+`--plugin` writes the project files and enables the plugin in `.claude/settings.json`
+(`enabledPlugins` + `extraKnownMarketplaces`), so it is active only in this repo. Then type
+`/coach today` (or `/learning-kit:coach today`).
+
+Updating: push to this repo, then `claude plugin update learning-kit@learning-kit` (or turn on
+auto-update for the marketplace in `/plugin`). `plugin.json` has no `version` on purpose: every
+commit counts as a new version.
+
+Developing the kit: `claude --plugin-dir ~/LEARNING/SWE/learning-kit` loads the working tree.
+
+## Quickstart (copy mode, legacy)
+
+Used by repos installed before the plugin (`english`, `how-to-think`). Copies skills into
+`.claude/skills/` with a hash manifest.
+
 
 ```sh
 mkdir -p ~/LEARNING/SWE/my-subject && cd ~/LEARNING/SWE/my-subject

@@ -133,9 +133,10 @@ def main():
 
     # The re-test backlog belongs to the same picture, so reuse the one script
     # that knows how to read Re-test cells instead of parsing them again here.
-    due = cfg.root / str(cfg.get("paths.skills_dir")) / "active-revise" / "scripts" / "due_reviews.py"
-    if not due.exists():  # running straight out of the kit repo
-        due = pathlib.Path(__file__).resolve().parents[2] / "active-revise" / "scripts" / "due_reviews.py"
+    # Sibling skill first (plugin, kit repo or copied install), project skills_dir as fallback.
+    due = pathlib.Path(__file__).resolve().parents[2] / "active-revise" / "scripts" / "due_reviews.py"
+    if not due.exists():
+        due = cfg.root / str(cfg.get("paths.skills_dir")) / "active-revise" / "scripts" / "due_reviews.py"
     if due.exists():
         print()
         sys.stdout.flush()  # keep the child's output in order with ours

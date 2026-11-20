@@ -14,7 +14,7 @@ One mistake is noise. The same kind of mistake across topics is a core misconcep
 1. **Collect.** Run:
 
 ```bash
-python3 .claude/skills/error-diagnose/scripts/collect_errors.py --project . --days 7
+python3 ${CLAUDE_SKILL_DIR}/scripts/collect_errors.py --project . --days 7
 ```
 
    Use `--days 14` for a bi-weekly review, `--topic <name>` for one topic. The defaults come from `review.weekly_window_days` and `review.error_window_days`. If the user wants a different window, pass it.

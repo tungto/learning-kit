@@ -53,9 +53,10 @@ def main():
     cfg, topics_dir = kcfg.from_args(a)
     mode = a.mode
     root = cfg.root
-    skills = root / str(cfg.get("paths.skills_dir"))
-    if not (skills / "active-revise").exists():  # running straight out of the kit repo
-        skills = pathlib.Path(__file__).resolve().parents[2]
+    # Sibling skills first (plugin, kit repo or copied install), project skills_dir as fallback.
+    skills = pathlib.Path(__file__).resolve().parents[2]
+    if not (skills / "active-revise").exists():
+        skills = root / str(cfg.get("paths.skills_dir"))
 
     def read(rel):
         f = root / str(rel)

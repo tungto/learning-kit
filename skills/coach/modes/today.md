@@ -2,7 +2,7 @@
 
 1. Run one call:
    ```bash
-   python3 .claude/skills/coach/scripts/brief_context.py today --project .
+   python3 <coach-dir>/scripts/brief_context.py today --project .
    ```
    It prints the date and week, the status-file sections (Now, this week, daily log, topics),
    the plan §4 rows for this week, `status_derive.py`, the error counts for the last

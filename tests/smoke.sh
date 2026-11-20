@@ -176,6 +176,17 @@ fi
 grep -q "oops" "$SC/.claude/settings.json" && ok "malformed settings.json untouched" || bad "settings untouched"
 rm -rf "$SC"
 
+echo "== installer: plugin mode"
+PL="$SC-plugin"; rm -rf "$PL"; mkdir -p "$PL"
+python3 "$KIT/init_project.py" "$PL" --plugin --title smoke --seed-topics one >/dev/null && ok "plugin mode runs" || bad "plugin mode runs"
+[ ! -d "$PL/.claude/skills" ] && [ ! -d "$PL/.claude/kit" ] && ok "plugin mode copies no skills/kit" || bad "plugin mode copies no skills/kit"
+grep -q '"learning-kit@learning-kit": true' "$PL/.claude/settings.json" && ok "plugin enabled at project scope" || bad "plugin enabled at project scope"
+grep -q '"tungto/learning-kit"' "$PL/.claude/settings.json" && ok "marketplace registered" || bad "marketplace registered"
+[ -f "$PL/learning.config.json" ] && [ -f "$PL/LEARNING-STYLE.md" ] && [ -d "$PL/topics/one" ] && ok "plugin mode project files" || bad "plugin mode project files"
+python3 "$KIT/scripts/validate.py" --project "$PL" >/dev/null 2>&1; [ $? -le 1 ] && ok "kit validate.py runs on plugin project" || bad "kit validate.py on plugin project"
+python3 "$KIT/skills/coach/scripts/brief_context.py" today --project "$PL" >/dev/null && ok "brief_context from plugin root" || bad "brief_context from plugin root"
+rm -rf "$PL"
+
 echo "== installer: configured plan/about paths"
 mkdir -p "$SC/reference"
 printf '{"paths": {"plan_file": "reference/plan.html", "about_file": "MISSION.md"}}\n' > "$SC/learning.config.json"

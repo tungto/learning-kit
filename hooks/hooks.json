@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 10,
+            "command": "[ -f \"$CLAUDE_PROJECT_DIR/learning.config.json\" ] && python3 \"${CLAUDE_PLUGIN_ROOT}/skills/active-revise/scripts/due_reviews.py\" --project \"$CLAUDE_PROJECT_DIR\" --summary || true"
+          }
+        ]
+      }
+    ]
+  }
+}

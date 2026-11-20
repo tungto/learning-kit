@@ -1,0 +1,12 @@
+{
+  "name": "learning-kit",
+  "owner": { "name": "tungto" },
+  "description": "Personal marketplace for the learning-kit plugin.",
+  "plugins": [
+    {
+      "name": "learning-kit",
+      "source": "./",
+      "description": "Domain-agnostic learning system driven by learning.config.json."
+    }
+  ]
+}

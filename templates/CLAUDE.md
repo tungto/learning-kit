@@ -20,7 +20,7 @@ session for lines most tasks never use. Read the part the task needs, when it ne
    always apply are repeated in the skills; read the file when teaching style, schedule or
    background actually matters.
 2. `{{STATUS_FILE}}`: week, streak, next action, per-topic state/ETA/flag. For any `coach` mode,
-   take it from `python3 .claude/skills/coach/scripts/brief_context.py <mode> --project .`
+   take it from the coach skill's `scripts/brief_context.py <mode> --project .`
    instead of reading the file (exception: `done`/`skipped`, which edits it).
 3. `{{PLAN_FILE}}`: goal (§1), graph (§2), bars (§3), phases (§4), tracks (§5), checkpoints (§6).
    Read one section: `grep -n '^##' {{PLAN_FILE}}`, then a ranged `sed -n`. `brief_context.py`
@@ -36,13 +36,13 @@ session for lines most tasks never use. Read the part the task needs, when it ne
 |---|---|
 | `{{STATUS_FILE}}`, `State` field in `TOPIC.md` | `coach` only |
 | `TOPIC.md` hours / subtopic levels / next action | `session-log` (levels only on independent evidence) |
-| `{{TOPICS_DIR}}/*/error-log.md`, `glossary.md` | `session-log` and `active-revise` (both via `.claude/skills/session-log/scripts/append_row.py`) |
+| `{{TOPICS_DIR}}/*/error-log.md`, `glossary.md` | `session-log` and `active-revise` (both via the session-log skill's `scripts/append_row.py`) |
 | `{{TOPICS_DIR}}/*/patterns.md` | `active-revise`, one line per row that passes the pattern rung (trigger -> move, user's words) |
 | `{{PLAN_FILE}}`, `{{ABOUT_FILE}}` | Edit only when the user asks |
 | `{{TOPICS_DIR}}/*/MISSION.md`, `RESOURCES.md`, `NOTES.md`, `learning-records/` | `teach` only |
 | `{{TOPICS_DIR}}/*/lessons/`, `assets/`, `reference/`, the folder `index.html` files | `create-lesson` (called by `teach`, or directly) |
 | `learning.config.json` | the user, or the AI when the user asks for a dial change |
-| `.claude/skills/*`, `.claude/kit/*`, `scripts/validate.py` | the kit's `init_project.py`. Local edits survive an update but land as `.kit-new` |
+| the skills, `kit/` and `validate.py` | the learning-kit plugin (or `init_project.py` in copy mode). Change them in the kit repo, not here |
 
 ## Skill routing
 
@@ -86,4 +86,4 @@ session for lines most tasks never use. Read the part the task needs, when it ne
   scripts read it with the parent-directory name.
 - Scripts take `--project .` and glob recursively. They skip any path segment starting with `_`.
 - A `Re-test` cell marks the date it was reviewed on with `✓`, `shaky` or `fail`. An unmarked past
-  date makes the row report overdue forever; `scripts/validate.py` warns about it.
+  date makes the row report overdue forever; `validate.py` warns about it.
